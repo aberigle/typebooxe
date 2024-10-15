@@ -12,12 +12,11 @@ const definitions: Record<string, TSchema> = {}
 const schemas: Record<string, mongoose.Schema> = {}
 
 export function typebooxe<
-  T,
-  QueryMethods = {}
+  T
 >(
   object  : TObject,
   options : TypebooxeOptions = {}
-): TypebooxeModel<T, QueryMethods> {
+): TypebooxeModel<T> {
 
   if (!("$id" in object)) throw new Error("Missing $id field")
 
@@ -28,7 +27,7 @@ export function typebooxe<
   return mongoose.model(
     name,
     schemas[name]
-  ) as TypebooxeModel<T, QueryMethods>
+  ) as TypebooxeModel<T>
 }
 
 export function useModels() {

@@ -45,7 +45,7 @@ function parseProperty(
 function parseObject(
   object: TObject
 ) {
-  const schema : SchemaDefinition<SchemaDefinitionType<any>> = {}
+  const schema : SchemaDefinition = {}
 
   for (const key in object.properties) {
     const property = object.properties[key]
