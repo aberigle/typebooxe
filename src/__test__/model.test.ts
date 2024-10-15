@@ -30,11 +30,21 @@ describe('typeboose', () => {
       expect(object._id).toBeUndefined()
     })
 
+    it('maintains the id', async () => {
+      const {
+        TestModel
+      } = create({ id : Type.String() })
+      let item = new TestModel({})
+
+      const object = item.cast()
+      expect(object.id).toBe(item._id.toHexString())
+    })
+
     it('handles ref objectids', async () => {
       const JobType    = Type.Object({ name: Type.String() }, { $id: 'Job' })
       const PersonType = Type.Object({
         name: Type.String(),
-        job: Type.Optional(Type.Ref(JobType))
+        job: Type.Ref(JobType)
       },{ $id : "Person"})
 
       const JobModel    = typebooxe<typeof JobType.static>(JobType)

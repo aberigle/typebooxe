@@ -35,7 +35,7 @@ describe('typeboose', () => {
     })
 
     it('plugins', () => {
-      const plugin = (schema ) => schema.name = "test"
+      const plugin = (schema) => schema.name = "test"
 
       const def = schema({ test: Type.String() }, { plugins : [plugin]})
       expect("name" in def).toBe(true)

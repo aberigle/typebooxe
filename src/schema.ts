@@ -63,10 +63,15 @@ function castItem(
 }
 
 function handleError(item, error) {
+  // console.log(error)
   switch (error.type) {
     case ValueErrorType.Object: // object was expected
       if (isValidObjectId(error.value)) // we have an objectid
         return Value.Patch(item, [{ type: "delete", path: error.path }])
+
+    case ValueErrorType.String: // we want to maintain the id
+      if (error.path === "/id")
+        return Value.Patch(item, [{ type : "update", path : error.path, value : item._id}])
     default: // nothing to do
       return item
   }
