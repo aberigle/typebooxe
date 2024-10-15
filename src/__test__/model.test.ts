@@ -1,6 +1,7 @@
 import { Type, type Static } from "@sinclair/typebox";
 import { describe, expect, it } from "bun:test";
 import { typebooxe } from "..";
+import { TypebooxeDocument } from "../types";
 
 function create(
   defition: any,
@@ -34,7 +35,7 @@ describe('typeboose', () => {
       const {
         TestModel
       } = create({ id : Type.String() })
-      let item = new TestModel({})
+      let item : TypebooxeDocument<any> = new TestModel({})
 
       const object = item.cast()
       expect(object.id).toBe(item._id.toHexString())
