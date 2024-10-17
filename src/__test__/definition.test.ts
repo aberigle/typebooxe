@@ -66,6 +66,17 @@ describe('typeboose', () => {
 
       expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref : 'Referenced' })
     })
+
+    it("not populated refs", () => {
+      const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
+      const def = definition({
+        reference: Type.Union([Type.Ref(tReferenced), Type.String()]),
+      },{
+        references : [tReferenced]
+      })
+
+      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref : 'Referenced' })
+    })
   })
 
 })

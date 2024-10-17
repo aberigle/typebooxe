@@ -1,41 +1,41 @@
 import { Type, type Static } from "@sinclair/typebox";
-import { describe, expect, it } from "bun:test";
-import { typebooxe } from "..";
-import { TypebooxeDocument } from "../types";
+import { afterEach, describe, expect, it } from "bun:test";
+import mongoose from "mongoose";
+import { typebooxe } from "../typebooxe";
 
-function create(
-  defition: any,
-  options = { $id: "Test" + Date.now() }
-) {
-  const TestType = Type.Object(defition, options)
-  const TestModel = typebooxe<Static<typeof TestType>>(TestType)
-  return { TestType, TestModel }
-}
 describe('typeboose', () => {
   describe('model', () => {
+    afterEach(() => {
+      for (let key of Object.keys(mongoose.models)) delete mongoose.models[key]
+    })
+
     it('creates a model', async () => {
-      const { TestModel } = create({ test: Type.String() })
+      const TestType = Type.Object({ test: Type.String() }, { $id: "Test" })
+      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+
       let item = new TestModel({ test: "hola" })
       expect(item.test).toBe("hola")
     })
 
     it('casts the type', async () => {
-      const {
-        TestModel
-      } = create({ test: Type.String(), date: Type.Date() })
+      const TestType = Type.Object({ test: Type.String(), date: Type.Date() }, { $id: "Test" })
+      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+
       let item = new TestModel({ test: "hola", date : new Date("2024-01-01") })
       expect(item.test).toBe("hola")
 
       const object = item.cast()
       expect(object.date instanceof Date).toBe(true)
+
+      // @ts-ignore
       expect(object._id).toBeUndefined()
     })
 
     it('maintains the id', async () => {
-      const {
-        TestModel
-      } = create({ id : Type.String() })
-      let item : TypebooxeDocument<any> = new TestModel({})
+      const TestType = Type.Object({ id : Type.String()}, { $id: "Test" })
+
+      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+      let item = new TestModel({})
 
       const object = item.cast()
       expect(object.id).toBe(item._id.toHexString())
@@ -64,6 +64,31 @@ describe('typeboose', () => {
 
       result = person.cast()
       expect(result.job).toBeUndefined()
+    })
+
+    it('casts union with ref to string when not populated', async () => {
+      const JobType    = Type.Object({ name: Type.String() }, { $id: 'Job' })
+      const PersonType = Type.Object({
+        name : Type.String(),
+        job  : Type.Union([Type.Ref(JobType), Type.String()])
+      },{ $id : "Person"})
+
+      const JobModel    = typebooxe<typeof JobType.static>(JobType)
+      const PersonModel = typebooxe<typeof PersonType.static>(PersonType)
+
+      let job    = new JobModel({ name: 'developer' })
+      let person = new PersonModel({ name: 'aberigle' })
+
+      person.job = job
+
+      let result = person.cast()
+      expect(result.job).toMatchObject({ name: 'developer' })
+
+      // @ts-ignore
+      person.job = job._id
+
+      result = person.cast()
+      expect(result.job).toBe(job._id.toHexString())
     })
 
   })

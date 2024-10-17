@@ -30,14 +30,11 @@ function parseProperty(
       ...def,
       type : Schema.Types.Mixed
     }
-    case 'Union' : // TODO
-
+    case 'Union' :
+      let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
+      if (ref) return parseProperty(ref)
+      // TODO handle when is not a ref
   }
-
-  // if (symbol === 'Union') {
-  //   let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
-  //   if (ref) return parseProperty(ref)
-  // }
 
   throw new Error("Type not supported: " + (field.type || symbol))
 }
