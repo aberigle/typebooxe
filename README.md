@@ -3,67 +3,62 @@
 [mongoose](https://mongoosejs.com/) meets [TypeBox](https://github.com/sinclairzx81/typebox)
 
 
+## Defining a Schema with typebooxe
+
 ```typescript
-import {
-  Type,
-  Static
-} from "@sinclair/typebox"
-import { typebooxe } from "typebooxe"
-
 const Person = Type.Object({
-  name : Type.String(),
-  age  : Type.Number()
+  name: Type.String(),
+  age: Type.Number(),
 }, {
-  $id : "Person" // used for collection name
-})
+  $id: "Person", // Used for the mongoose collection name
+});
 
-type PersonType = Static<typeof Person>
+type PersonType = Static<typeof Person>; // Define type for Person schema
 
-const PersonModel = typebooxe<PersonType>(Person)
+const PersonModel = typebooxe<PersonType>(Person);
 
-// ... connect to mongoose
+// ... Connect to your MongoDB instance
 
+// Create a new person document
 const person = await PersonModel.create({
-  name : "aberigle",
-  age : 34
-})
+  name: "aberigle",
+  age: 34,
+});
 
-console.log(person)
-// Type : Document
-// {
+console.log(person); // Document type (includes Mongoose-specific properties)
+// Output: {
 //   name: "aberigle",
 //   age: 34,
 //   _id: new ObjectId('670e8b0c500875615df28cac'),
 // }
 
-console.log(person.cast())
-// Type: PersonType
-// {
+console.log(person.cast()); // PersonType
+// Output : {
 //   name: "aberigle",
-//   age: 34,
+//   age: 34
 // }
-
 ```
 
-## Supported types
+Calling `.cast()` turns the Mongoose document into a TypeBox-valiadble object, matching the defined schema
 
-```typescript
-Type.String()   => { type : String }
-Type.Number()   => { type : Number }
-Type.Integer()  => { type : Number }
-Type.Boolean()  => { type : Boolean }
-Type.Date()     => { type : Date }
-Type.Any()      => { type : Schema.Types.Mixed }
+## Supported Data Types
+
 ```
+Type.String()   => { type : String, required : true }
+Type.Number()   => { type : Number, required : true }
+Type.Integer()  => { type : Number, required : true }
+Type.Boolean()  => { type : Boolean, required : true }
+Type.Date()     => { type : Date, required : true }
+Type.Any()      => { type : Schema.Types.Mixed, required : true }
+```
+__Note__: By default, all fields are required unless wrapped in `Type.Optional()`
 
-By default all fields are required, unless wrapped in `Type.Optional()`
-
-```typescript
+```
 Type.Optional(Type.String()) => { type : String, required : false}
 ```
 
-### `_id` field
-The `_id` field wont be serialized if it's not defined in the schema.
+## Handling the `_id` Field
+mongodb automatically generates an `_id` field for each document. If you don't explicitly define it in the schema, it won't be serialized.
 
 ```typescript
 const Person = Type.Object({
@@ -71,26 +66,28 @@ const Person = Type.Object({
 })
 ```
 
-### References
-You can define references using `Type.Ref()` function and they will be mapped to mongoose references.
+## Defining References Between Models
+TypeBox allows you to define relationships between models using `Type.Ref()`. This function creates a reference type that maps to mongoose references.
+
+Here's an example of defining a Person with a reference to a Job model:
 
 ```typescript
 const Job = Type.Object({
-  name : Type.String()
+  name: Type.String(),
 }, {
-  $id : "Job"
-})
+  $id: "Job",
+});
 
-const JobModel = typebooxe<Static<typeof Job>>(Job)
+const JobModel = typebooxe<Static<typeof Job>>(Job);
 
 const Person = Type.Object({
-  name : Type.String(),
-  job  : Type.Ref(Job)
+  name: Type.String(),
+  job: Type.Ref(Job), // Reference to the Job model
 }, {
-  $id : "Person"
-})
+  $id: "Person",
+});
 
-const PersonModel = typebooxe<Static<typeof Person>>(Person)
+const PersonModel = typebooxe<Static<typeof Person>>(Person);
 
 const person = await PersonModel.findOne({
   name : "aberigle"
@@ -104,4 +101,28 @@ person.cast()
 //     name : "developer"
 //   }
 // }
+```
+
+### Making References Optional
+
+There are two ways to make references optional:
+
+1. **Union with String:** Define the field as a union of `Type.Ref(Job)` and `Type.String()`. This allows to cast to the referenced model or the objectid's string value in the `job` field.
+```typescript
+const Person = Type.Object({
+  name : Type.String(),
+  job  : Type.Union([ Type.Ref(Job), Type.String() ])
+}, {
+  $id : "Person"
+})
+```
+
+2. **Optional Reference:** Use `Type.Optional(Type.Ref(Job))`. This ensures the `.job` field won't exist altogether in the casted object if not populated
+```typescript
+const Person = Type.Object({
+  name : Type.String(),
+  job  : Type.Optional(Type.Ref(Job))
+}, {
+  $id : "Person"
+})
 ```
