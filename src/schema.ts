@@ -3,7 +3,7 @@ import { Value, ValueErrorType } from '@sinclair/typebox/value'
 import { isValidObjectId, ResolveSchemaOptions, Schema, SchemaOptions } from "mongoose"
 import { createDefinition } from "./definition"
 import type { TypebooxeOptions } from "./types"
-import { useModels } from "."
+import { useModels } from "./typebooxe"
 
 export function createSchema<T>(
   object  : TObject,

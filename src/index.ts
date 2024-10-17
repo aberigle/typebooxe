@@ -1,35 +1,13 @@
 import {
-  type TObject,
-  type TSchema
-} from "@sinclair/typebox";
+  typebooxe
+} from "./typebooxe"
 
-import mongoose from "mongoose";
+export {
+  TypebooxeDocument,
+  TypebooxeModel,
+  TypebooxeOptions
+} from "./types"
 
-import { createSchema } from "./schema";
-import type { TypebooxeModel, TypebooxeOptions } from "./types";
+export { useModels } from "./typebooxe"
 
-const definitions: Record<string, TSchema> = {}
-const schemas: Record<string, mongoose.Schema> = {}
-
-export function typebooxe<
-  T
->(
-  object  : TObject,
-  options : TypebooxeOptions = {}
-): TypebooxeModel<T> {
-
-  if (!("$id" in object)) throw new Error("Missing $id field")
-
-  const name : string = object.$id as string
-  definitions[name] = object
-  schemas[name]     = createSchema<T>(object, options)
-
-  return mongoose.model(
-    name,
-    schemas[name]
-  ) as TypebooxeModel<T>
-}
-
-export function useModels() {
-  return definitions
-}
+export default typebooxe
