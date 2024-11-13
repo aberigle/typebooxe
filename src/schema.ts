@@ -11,10 +11,14 @@ export function createSchema<T>(
     schema,
     options,
     indexes,
-    plugins
+    plugins,
+    getters
   } : TypebooxeOptions = {}
 ) {
-  const definition = createDefinition(object)
+  const definition = createDefinition(object, { getters })
+
+  // serialize getters by default
+  if (getters) options = { toObject: { getters: true }, ...options }
 
   const schemaOptions: SchemaOptions = {
     ...options
