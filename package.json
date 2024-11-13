@@ -11,12 +11,12 @@
   "scripts": {
     "build:types": "tsc --project tsconfig.dts.json",
     "build": "bun test && bun run build:types && bun build.ts",
-    "publishLocal": "yalc publish --push"
+    "publishLocal": "bun run build && yalc publish --push"
   },
   "devDependencies": {
-    "@sinclair/typebox": "^0.33.16",
+    "@sinclair/typebox": "^0.33.17",
     "@types/bun": "^1.1.11",
-    "mongoose": "^8.7.1"
+    "mongoose": "^8.7.2"
   },
   "peerDependencies": {
     "@sinclair/typebox": "~0.33.0",
