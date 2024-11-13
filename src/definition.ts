@@ -34,7 +34,11 @@ function parseProperty(
     case 'Union' :
       let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
       if (ref) return parseProperty(ref)
-      // TODO handle when is not a ref
+      return {
+        ...def,
+        type : String,
+        enum : field.anyOf.map(value => value.const)
+      }
   }
 
   throw new Error("Type not supported: " + (field.type || symbol))

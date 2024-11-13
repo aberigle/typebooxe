@@ -67,6 +67,22 @@ describe('typeboose', () => {
       expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref : 'Referenced' })
     })
 
+    it("enums", () => {
+      enum TestEnum {
+        ONE = "ONE",
+        TWO = "TWO"
+      }
+
+      const def = definition({
+        field : Type.Enum(TestEnum)
+      })
+
+      expect(def.field).toMatchObject({
+        type : String, enum : ["ONE", "TWO"]
+      })
+
+    })
+
     it("not populated refs", () => {
       const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
       const def = definition({
