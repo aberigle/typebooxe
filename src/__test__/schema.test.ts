@@ -34,6 +34,18 @@ describe('typeboose', () => {
       expect(result[1]).toMatchObject({ unique: true })
     })
 
+    it('getters', () => {
+      const fn = (value) => "hola"
+
+      const def = schema({
+        test : Type.String()
+      },{ getters : {
+        test : fn
+      }} )
+
+      expect(def?.obj?.test.get).toBe(fn)
+    })
+
     it('plugins', () => {
       const plugin = (schema) => schema.name = "test"
 

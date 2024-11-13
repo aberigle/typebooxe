@@ -1,5 +1,6 @@
 import { type TObject, type TSchema } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition, type SchemaDefinitionType } from "mongoose"
+import { DefinitionOptions } from "./types"
 
 function parseProperty(
   field : TSchema
@@ -40,7 +41,11 @@ function parseProperty(
 }
 
 function parseObject(
-  object: TObject
+  object: TObject,
+  {
+    getters,
+    setters
+  }: DefinitionOptions = {}
 ) {
   const schema : SchemaDefinition = {}
 
@@ -48,7 +53,10 @@ function parseObject(
     const property = object.properties[key]
     const field = parseProperty(property)
 
-    field.required = !!object.required?.includes(key)
+    if (field.type) field.required = !!object.required?.includes(key)
+
+    if (getters && getters[key]) field.get = getters[key]
+    if (setters && setters[key]) field.set = setters[key]
 
     schema[key] = field
   }
@@ -57,7 +65,8 @@ function parseObject(
 }
 
 export function createDefinition(
-  object : TObject
+  object  : TObject,
+  options : DefinitionOptions = {}
 ) {
-  return parseObject(object)
+  return parseObject(object, options)
 }
