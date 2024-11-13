@@ -38,7 +38,6 @@ describe('typeboose', () => {
       expect(def.test).toMatchObject({ type: Date })
     })
 
-
     it("optionals", () => {
       const def = definition({
         mandatory : Type.String(),
@@ -81,6 +80,18 @@ describe('typeboose', () => {
         type : String, enum : ["ONE", "TWO"]
       })
 
+    })
+
+    it("objects", () => {
+      const def = definition({
+        test : Type.Object({
+          field : Type.String()
+        })
+      })
+
+      expect(def.test).toStrictEqual({
+        field: { type: String, required : true }
+      })
     })
 
     it("not populated refs", () => {

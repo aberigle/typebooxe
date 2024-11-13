@@ -16,6 +16,7 @@ function parseProperty(
     case 'integer' : return { ...def, type: Number }
     case 'boolean' : return { ...def, type: Boolean }
     case 'Date'    : return { ...def, type: Date }
+    case 'object'  : return parseObject(field as TObject)
   }
 
   const key    = Symbol.for("TypeBox.Kind")
