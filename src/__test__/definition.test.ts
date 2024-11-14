@@ -8,7 +8,7 @@ function definition(def: any, options = {}) {
   return createDefinition(Type.Object(def, options))
 }
 
-describe('typeboose', () => {
+describe('typebooxe', () => {
   describe('definition', () => {
     it("strings", () => {
       const def = definition({

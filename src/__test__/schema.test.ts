@@ -9,7 +9,7 @@ function schema(def: any, options: TypebooxeOptions = {}) {
   return createSchema(Type.Object(def), options)
 }
 
-describe('typeboose', () => {
+describe('typebooxe', () => {
   describe('schema', () => {
     it('timestamps', () => {
       let def = schema({ test: Type.String() })

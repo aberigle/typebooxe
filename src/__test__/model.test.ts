@@ -1,11 +1,11 @@
 import { Type, type Static } from "@sinclair/typebox";
-import { afterEach, describe, expect, it } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { typebooxe } from "../typebooxe";
 
-describe('typeboose', () => {
+describe('typebooxe', () => {
   describe('model', () => {
-    afterEach(() => {
+    beforeEach(() => {
       for (let key of Object.keys(mongoose.models)) delete mongoose.models[key]
     })
 
