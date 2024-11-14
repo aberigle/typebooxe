@@ -1,4 +1,4 @@
-import { TSchema, type TObject } from "@sinclair/typebox"
+import { TSchema, Type, type TObject } from "@sinclair/typebox"
 import { Value, ValueErrorType } from '@sinclair/typebox/value'
 import { isValidObjectId, ResolveSchemaOptions, Schema, SchemaOptions } from "mongoose"
 import { createDefinition } from "./definition"
@@ -31,11 +31,20 @@ export function createSchema<
     ...schema
   }, schemaOptions as ResolveSchemaOptions<T>)
 
+  const castTypes : TObject[] = [object]
+  if (plugins) for (let item of plugins) {
+    let plugin = "plugin" in item? item.plugin : item
+
+    if ("$typebooxe" in item) castTypes.push(item.$typebooxe)
+
+    result.plugin(plugin)
+  }
 
   const references = Object.values(useModels())
+  const castType = Type.Intersect(castTypes)
   result.methods.cast = function() : T {
     return castItem(
-      object,
+      castType,
       this.toObject({
         flattenObjectIds: true
       }),
@@ -47,17 +56,12 @@ export function createSchema<
     result.index(index, options || {})
   }
 
-  if (plugins) for (let item of plugins) {
-    let plugin = "plugin" in item? item.plugin : item
-    result.plugin(plugin)
-  }
-
   return result
 }
 
 
 function castItem(
-  def : TObject,
+  def : TSchema,
   item : any,
   references: TSchema[] = []
 ) {

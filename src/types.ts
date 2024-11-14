@@ -1,4 +1,4 @@
-import { TSchema } from "@sinclair/typebox"
+import { TObject, TSchema } from "@sinclair/typebox"
 import type mongoose from "mongoose"
 
 export type MongooseIndexOption = {
@@ -30,7 +30,7 @@ export type TypebooxeDocument<T> = mongoose.Document<
 > & T
 
 export type TypebooxePlugin = {
-  $typebooxe : TSchema,
+  $typebooxe : TObject,
   plugin     : (scheme : mongoose.Schema, options : any) => any
 } | ((schema: mongoose.Schema, options: any) => void)
 

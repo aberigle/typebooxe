@@ -30,7 +30,6 @@ describe('typebooxe', () => {
 
       const object = model.cast()
       expect(object.number).toBe(3)
-
     })
   })
 })
