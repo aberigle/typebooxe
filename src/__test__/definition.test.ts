@@ -106,6 +106,18 @@ describe('typebooxe', () => {
       })
     })
 
+    it("arrays", () => {
+      const def = definition({
+        text : Type.Array(Type.String()),
+        objects : Type.Array(Type.Object({
+          test  : Type.String()
+        }))
+      })
+
+      expect(def.text).toMatchObject([{ type : String }])
+      expect(def.objects).toMatchObject([{ test: { type: String } }])
+    })
+
     it("not populated refs", () => {
       const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
       const def = definition({
