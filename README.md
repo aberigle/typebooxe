@@ -2,7 +2,6 @@
 
 [mongoose](https://mongoosejs.com/) meets [TypeBox](https://github.com/sinclairzx81/typebox)
 
-
 ## Defining a Schema with typebooxe
 
 ```typescript
@@ -51,10 +50,41 @@ Type.Boolean()  => { type : Boolean, required : true }
 Type.Date()     => { type : Date, required : true }
 Type.Any()      => { type : Schema.Types.Mixed, required : true }
 ```
-__Note__: By default, all fields are required unless wrapped in `Type.Optional()`
+
+
+### Objects and Arrays
+Embed documents can be defined with `Type.Object()`
+```
+Type.Object({              {
+  field : Type.String() =>    field : { type : String, required : true }
+})                         }
+```
+
+Additionally, arrays can be defined with `Type.Array()`
+```
+Type.Array(Type.String()) => [{ type : String, required : true }]
+Type.Array(Type.Object({     [{
+  field : Type.String()   =>    field : { type : String, required : true }
+}))                          }]
+```
+
+### Optional fields
+By default, all fields are required unless wrapped in `Type.Optional()`
 
 ```
 Type.Optional(Type.String()) => { type : String, required : false}
+```
+
+### Enums
+Enums are defined by typescript a `enum` and `Type.Enum()`
+```typescript
+enum JobTypes {
+  developer = "developer",
+  designer  = "designer",
+  manager   = "manager"
+}
+
+Type.Enum(JobTypes) => { type : String, enum : ["developer", "designer", "manager"]}
 ```
 
 ## Handling the `_id` Field
