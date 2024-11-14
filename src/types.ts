@@ -19,8 +19,11 @@ export type TypebooxeOptions = {
   indexes?: Array<MongooseIndexOption>,
 } & DefinitionOptions
 
-type Methods<T> = {
-  cast(): T
+type Methods<
+  T,
+  Plugins extends readonly unknown[] = []
+> = {
+  cast(): MergeTypeArray<[T, ...Plugins]>
 }
 
 export type TypebooxeDocument<T> = mongoose.Document<

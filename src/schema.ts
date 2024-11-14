@@ -42,14 +42,14 @@ export function createSchema<
 
   const references = Object.values(useModels())
   const castType = Type.Intersect(castTypes)
-  result.methods.cast = function() : T {
+  result.methods.cast = function() {
     return castItem(
       castType,
       this.toObject({
         flattenObjectIds: true
       }),
       references
-    ) as T
+    )
   }
 
   if (indexes) for (let { index, options } of indexes) {
