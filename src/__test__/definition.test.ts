@@ -47,6 +47,18 @@ describe('typebooxe', () => {
       expect(def.optional).toMatchObject({ type: String, required: false })
     })
 
+    it("defaults", () => {
+      const def = definition({
+        flag   : Type.Boolean({ default: false }),
+        text   : Type.String({ default: "hello" }),
+        number : Type.Number({ default: 27 })
+      })
+
+      expect(def.flag).toMatchObject({ type: Boolean, default: false })
+      expect(def.text).toMatchObject({ type : String, default : "hello" })
+      expect(def.number).toMatchObject({ type : Number, default : 27 })
+    })
+
     it("any (Mixed)",  () => {
       const def = definition({
         test : Type.Any()

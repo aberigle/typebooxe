@@ -60,6 +60,8 @@ function parseObject(
 
     if (field.type) field.required = !!object.required?.includes(key)
 
+    if ("default" in property) field.default = property.default
+
     if (getters && getters[key]) field.get = getters[key]
     if (setters && setters[key]) field.set = setters[key]
 
