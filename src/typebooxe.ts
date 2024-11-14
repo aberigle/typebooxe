@@ -3,20 +3,20 @@ import {
   type TSchema
 } from "@sinclair/typebox";
 
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 import { createSchema } from "./schema";
-import type { TypebooxeModel, TypebooxeOptions } from "./types";
+import type { MergeTypeArray, TypebooxeModel, TypebooxeOptions, TypebooxePlugin } from "./types";
 
 const definitions: Record<string, TSchema> = {}
 const schemas: Record<string, mongoose.Schema> = {}
 
 export function typebooxe<
-  T
+  T, Plugins extends readonly unknown[] = []
 >(
   object  : TObject,
   options : TypebooxeOptions = {}
-): TypebooxeModel<T> {
+): MergeTypeArray<[TypebooxeModel<T, Plugins>, ...Plugins]> {
 
   if (!("$id" in object)) throw new Error("Missing $id field")
 
@@ -27,7 +27,23 @@ export function typebooxe<
   return mongoose.model(
     name,
     schemas[name]
-  ) as TypebooxeModel<T>
+  ) as MergeTypeArray<[TypebooxeModel<T, Plugins>, ...Plugins]>
+}
+
+export function typebooxePlugin<
+  T
+>(
+  object  : TObject,
+  options : TypebooxeOptions = {}
+): TypebooxePlugin  {
+  const plugin = createSchema<T>(object, options)
+
+  return {
+    $typebooxe : object,
+    plugin : (schema : Schema) => {
+      schema.add(plugin.obj)
+    }
+  }
 }
 
 export function useModels() {

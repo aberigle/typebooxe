@@ -1,3 +1,4 @@
+import { TSchema } from "@sinclair/typebox"
 import type mongoose from "mongoose"
 
 export type MongooseIndexOption = {
@@ -14,7 +15,7 @@ export type TypebooxeOptions = {
   schema?: mongoose.SchemaDefinition,
   options?: mongoose.SchemaOptions,
   methods?: Record<string, Function>,
-  plugins?: Array<(schema: mongoose.Schema, options: any) => void>,
+  plugins?: Array<TypebooxePlugin>,
   indexes?: Array<MongooseIndexOption>,
 } & DefinitionOptions
 
@@ -28,9 +29,21 @@ export type TypebooxeDocument<T> = mongoose.Document<
   T
 > & T
 
-export type TypebooxeModel<T, QueryMethods = {}> = mongoose.Model<
+export type TypebooxePlugin = {
+  $typebooxe : TSchema,
+  plugin     : (scheme : mongoose.Schema, options : any) => any
+} | ((schema: mongoose.Schema, options: any) => void)
+
+export type TypebooxeModel<
   T,
-  QueryMethods,
-  Methods<T>,
+  Plugins extends readonly unknown[] = []
+> = mongoose.Model<
+  MergeTypeArray<[T, ...Plugins]>,
+  {},
+  Methods<T, Plugins>,
   {}
 >
+
+export type MergeTypeArray<T extends readonly unknown[]> = T extends [infer First, ...infer Rest]
+  ? First & MergeTypeArray<Rest>
+  : unknown;

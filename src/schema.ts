@@ -5,7 +5,9 @@ import { createDefinition } from "./definition"
 import type { TypebooxeOptions } from "./types"
 import { useModels } from "./typebooxe"
 
-export function createSchema<T>(
+export function createSchema<
+  T
+>(
   object  : TObject,
   {
     schema,
@@ -45,7 +47,8 @@ export function createSchema<T>(
     result.index(index, options || {})
   }
 
-  if (plugins) for (let plugin of plugins) {
+  if (plugins) for (let item of plugins) {
+    let plugin = "plugin" in item? item.plugin : item
     result.plugin(plugin)
   }
 
