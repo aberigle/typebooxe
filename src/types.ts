@@ -47,6 +47,8 @@ export type TypebooxeModel<
   {}
 >
 
-export type MergeTypeArray<T extends readonly unknown[]> = T extends [infer First, ...infer Rest]
+export type MergeTypeArray<
+  T extends readonly unknown[]
+> = T extends [infer First, ...infer Rest]
   ? First & MergeTypeArray<Rest>
   : unknown;

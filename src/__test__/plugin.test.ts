@@ -21,7 +21,7 @@ describe('typebooxe', () => {
   describe('plugin', () => {
     it('adds fields', () => {
       const PluginType = Type.Object({ number : Type.Number()})
-      const Plugin = typebooxePlugin<Static<typeof PluginType>>(PluginType)
+      const Plugin = typebooxePlugin<typeof PluginType.static>(PluginType)
 
       const TestModel = createModel<typeof PluginType.static>(Plugin)
 

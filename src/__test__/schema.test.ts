@@ -43,7 +43,7 @@ describe('typebooxe', () => {
         test : fn
       }} )
 
-      expect(def?.obj?.test.get).toBe(fn)
+      expect(def.obj.test?.get).toBe(fn)
     })
 
     it('plugins', () => {

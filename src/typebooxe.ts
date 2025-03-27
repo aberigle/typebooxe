@@ -12,7 +12,8 @@ const definitions: Record<string, TSchema> = {}
 const schemas: Record<string, mongoose.Schema> = {}
 
 export function typebooxe<
-  T, Plugins extends readonly unknown[] = []
+  T,
+  Plugins extends readonly unknown[] = []
 >(
   object  : TObject,
   options : TypebooxeOptions = {}
