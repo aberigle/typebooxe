@@ -14,8 +14,8 @@
     "publishLocal": "bun run build && yalc publish --push"
   },
   "devDependencies": {
-    "@sinclair/typebox": "^0.33.17",
-    "@types/bun": "^1.1.11",
+    "@sinclair/typebox": "^0.33.22",
+    "@types/bun": "^1.2.6",
     "mongoose": "^8.7.2"
   },
   "peerDependencies": {

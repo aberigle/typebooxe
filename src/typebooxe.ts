@@ -3,7 +3,8 @@ import {
   type TSchema
 } from "@sinclair/typebox";
 
-import mongoose, { Schema } from "mongoose";
+// @ts-ignore
+import mongoose, { Schema } from "mongoose/lib/index.js";
 
 import { createSchema } from "./schema";
 import type { MergeTypeArray, TypebooxeModel, TypebooxeOptions, TypebooxePlugin } from "./types";
@@ -12,10 +13,10 @@ const definitions: Record<string, TSchema> = {}
 const schemas: Record<string, mongoose.Schema> = {}
 
 export function typebooxe<
-  T,
+  T extends TObject,
   Plugins extends readonly unknown[] = []
 >(
-  object  : TObject,
+  object  : T,
   options : TypebooxeOptions = {}
 ): MergeTypeArray<[TypebooxeModel<T, Plugins>, ...Plugins]> {
 
