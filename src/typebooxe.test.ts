@@ -1,7 +1,7 @@
-import { Type, type Static } from "@sinclair/typebox";
+import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
-import { typebooxe } from "../typebooxe";
+import { typebooxe } from "./typebooxe";
 
 describe('typebooxe', () => {
   describe('model', () => {
@@ -11,7 +11,7 @@ describe('typebooxe', () => {
 
     it('creates a model', async () => {
       const TestType = Type.Object({ test: Type.String() }, { $id: "Test" })
-      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+      const TestModel = typebooxe(TestType)
 
       let item = new TestModel({ test: "hola" })
       expect(item.test).toBe("hola")
@@ -19,7 +19,7 @@ describe('typebooxe', () => {
 
     it('casts the type', async () => {
       const TestType = Type.Object({ test: Type.String(), date: Type.Date() }, { $id: "Test" })
-      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+      const TestModel = typebooxe(TestType)
 
       let item = new TestModel({ test: "hola", date : new Date("2024-01-01") })
       expect(item.test).toBe("hola")
@@ -34,7 +34,7 @@ describe('typebooxe', () => {
     it('maintains the id', async () => {
       const TestType = Type.Object({ id : Type.String()}, { $id: "Test" })
 
-      const TestModel = typebooxe<Static<typeof TestType>>(TestType)
+      const TestModel = typebooxe(TestType)
       let item = new TestModel({})
 
       const object = item.cast()
@@ -46,10 +46,10 @@ describe('typebooxe', () => {
       const PersonType = Type.Object({
         name: Type.String(),
         job: Type.Ref(JobType)
-      },{ $id : "Person"})
+      }, { $id: "Person" })
 
-      const JobModel    = typebooxe<typeof JobType.static>(JobType)
-      const PersonModel = typebooxe<typeof PersonType.static>(PersonType)
+      const JobModel    = typebooxe(JobType)
+      const PersonModel = typebooxe(PersonType)
 
       let job    = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
@@ -71,10 +71,10 @@ describe('typebooxe', () => {
       const PersonType = Type.Object({
         name : Type.String(),
         job  : Type.Union([Type.Ref(JobType), Type.String()])
-      },{ $id : "Person"})
+      }, { $id: "Person" })
 
-      const JobModel    = typebooxe<typeof JobType.static>(JobType)
-      const PersonModel = typebooxe<typeof PersonType.static>(PersonType)
+      const JobModel    = typebooxe(JobType)
+      const PersonModel = typebooxe(PersonType)
 
       let job    = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })

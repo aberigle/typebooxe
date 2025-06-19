@@ -2,7 +2,7 @@
 import { Type } from "@sinclair/typebox";
 import { describe, expect, it } from "bun:test";
 import { Schema } from "mongoose";
-import { createDefinition } from "../definition";
+import { createDefinition } from "./definition";
 
 function definition(def: any, options = {}) {
   return createDefinition(Type.Object(def, options))

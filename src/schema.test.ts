@@ -1,11 +1,14 @@
 import { Type } from "@sinclair/typebox";
 import { describe, expect, it } from "bun:test";
 
-import { createSchema } from "../schema";
-import type { TypebooxeOptions } from "../types";
+import { createSchema } from "./schema";
+import { typebooxePlugin } from "./typebooxe";
 
 
-function schema(def: any, options: TypebooxeOptions = {}) {
+function schema(
+    def: any,
+    options = {}
+  ) {
   return createSchema(Type.Object(def), options)
 }
 
@@ -43,14 +46,17 @@ describe('typebooxe', () => {
         test : fn
       }} )
 
+      // @ts-ignore TODO fix
       expect(def.obj.test?.get).toBe(fn)
     })
 
     it('plugins', () => {
-      const plugin = (schema) => schema.name = "test"
+      const plugin = typebooxePlugin(Type.Object({
+        name : Type.String()
+      }))
 
       const def = schema({ test: Type.String() }, { plugins : [plugin]})
-      expect("name" in def).toBe(true)
+      expect("name" in def.paths).toBe(true)
       if ("name" in def) expect(def.name).toBe("test")
     })
   })
