@@ -14,7 +14,7 @@ const Person = Type.Object({
 
 type PersonType = Static<typeof Person>; // Define type for Person schema
 
-const PersonModel = typebooxe<PersonType>(Person);
+const PersonModel = typebooxe(Person);
 
 // ... Connect to your MongoDB instance
 
@@ -108,7 +108,7 @@ const Job = Type.Object({
   $id: "Job",
 });
 
-const JobModel = typebooxe<Static<typeof Job>>(Job);
+const JobModel = typebooxe(Job);
 
 const Person = Type.Object({
   name: Type.String(),
@@ -117,7 +117,7 @@ const Person = Type.Object({
   $id: "Person",
 });
 
-const PersonModel = typebooxe<Static<typeof Person>>(Person);
+const PersonModel = typebooxe(Person);
 
 const person = await PersonModel.findOne({
   name : "aberigle"
