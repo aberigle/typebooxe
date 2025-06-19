@@ -1,21 +1,22 @@
-import { TSchema, Type, type TObject } from "@sinclair/typebox"
+import { Static, TSchema, Type, type TObject } from "@sinclair/typebox"
 import { Value, ValueErrorType } from '@sinclair/typebox/value'
 import { isValidObjectId, ResolveSchemaOptions, Schema, SchemaOptions } from "mongoose"
 import { createDefinition } from "./definition"
-import type { TypebooxeOptions } from "./types"
 import { useModels } from "./typebooxe"
+import { TypebooxeRaw, type TypebooxeOptions, type TypebooxePlugin } from "./types"
 
 export function createSchema<
-  T
+  T extends TObject,
+  Plugins extends readonly TypebooxePlugin<TObject>[] = []
 >(
-  object  : TObject,
+  object  : T,
   {
     schema,
     options,
     indexes,
     plugins,
     getters
-  } : TypebooxeOptions = {}
+  } : TypebooxeOptions<Plugins> = {}
 ) {
   const definition = createDefinition(object, { getters })
 
@@ -26,10 +27,12 @@ export function createSchema<
     ...options
   }
 
-  const result: Schema = new Schema<T>({
+  const result: Schema = new Schema<
+    TypebooxeRaw<T, Plugins>
+  >({
     ...definition,
     ...schema
-  }, schemaOptions as ResolveSchemaOptions<T>)
+  }, schemaOptions as ResolveSchemaOptions<Static<T>>)
 
   const castTypes : TObject[] = [object]
   if (plugins) for (let item of plugins) {
@@ -77,6 +80,12 @@ function handleError(item, error) {
   // console.log(error)
   switch (error.type) {
     case ValueErrorType.Object: // object was expected
+
+      if (// a reference not populated, we return the id nested as an object
+        error.schema.$id.includes("ref@") &&
+        isValidObjectId(error.value)
+      ) return Value.Patch(item, [{ type: "update", path: error.path, value: { id: error.value } }])
+
       if (isValidObjectId(error.value)) // we have an objectid
         return Value.Patch(item, [{ type: "delete", path: error.path }])
 

@@ -5,6 +5,8 @@ export {
   TypebooxeOptions
 } from "./types"
 
+export { TypebooxeRef } from "./reference"
+
 export {
   typebooxePlugin,
   useModels
