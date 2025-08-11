@@ -25,7 +25,7 @@ export type Methods<
   T extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = {
-  cast(): TypebooxeRaw<T, Plugins>
+    cast<M extends TObject = T>(castType?: M): TypebooxeRaw<M, Plugins>
 }
 
 export const ObjectId = Type.Transform(Type.String({ pattern: '^[0-9a-fA-F]{24}$' }))

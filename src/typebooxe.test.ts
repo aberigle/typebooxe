@@ -31,8 +31,28 @@ describe('typebooxe', () => {
       expect(object._id).toBeUndefined()
     })
 
+    it("casts to compatible types", async () => {
+      const TestType = Type.Object({ test: Type.String(), date: Type.Date(), secret: Type.String() }, { $id: "Test" })
+      const TestModel = typebooxe(TestType)
+
+      let item = new TestModel({ test: "hola", date: new Date("2024-01-01"), secret: "1secret2" })
+      expect(item.test).toBe("hola")
+
+      const object = item.cast()
+      expect(object.date instanceof Date).toBe(true)
+      expect(object.secret).toBe("1secret2")
+
+
+      const PublicType = Type.Omit(TestType, ['secret'])
+      const publicObject = item.cast(PublicType)
+      expect(publicObject.date instanceof Date).toBe(true)
+      // @ts-ignore
+      expect(publicObject.secret).toBeUndefined()
+
+    })
+
     it('maintains the id', async () => {
-      const TestType = Type.Object({ id : Type.String()}, { $id: "Test" })
+      const TestType = Type.Object({ id: Type.String() }, { $id: "Test" })
 
       const TestModel = typebooxe(TestType)
       let item = new TestModel({})
