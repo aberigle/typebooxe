@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { TypebooxeRef } from "./reference";
 import { typebooxe } from "./typebooxe";
-import { ObjectId } from "./types";
 
 describe('typebooxe', () => {
   describe('model', () => {
@@ -33,6 +32,7 @@ describe('typebooxe', () => {
 
       person.job = job.id
       result = person.cast()
+
       expect(result.job).toEqual({ id: job.id })
     })
 

@@ -1,7 +1,6 @@
 import { type TObject, type TSchema } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
 import { DefinitionOptions } from "./types"
-import { TSConfig } from "bun"
 
 function parseProperty(
   field : TSchema
@@ -35,6 +34,7 @@ function parseProperty(
       type : Schema.Types.Mixed
     }
     case 'Union' :
+      if (field.$id?.includes("ref@")) return parseReference(field)
       let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
       if (ref) return parseProperty(ref)
       return {
@@ -48,7 +48,7 @@ function parseProperty(
 }
 
 function parseReference(
-  field : TObject
+  field : TSchema
 ) : SchemaTypeOptions<any> {
   const model = field.$id?.split("ref@").pop()
 

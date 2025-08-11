@@ -1,4 +1,4 @@
-import { Static, TObject, Type } from "@sinclair/typebox"
+import { Static, TObject, TSchema, Type } from "@sinclair/typebox"
 import mongoose, { Types } from "mongoose"
 
 export type MongooseIndexOption = {
@@ -25,7 +25,7 @@ export type Methods<
   T extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = {
-    cast<M extends TObject = T>(castType?: M): TypebooxeRaw<M, Plugins>
+    cast<M extends TSchema = T>(castType?: M): TypebooxeRaw<M, Plugins>
 }
 
 export const ObjectId = Type.Transform(Type.String({ pattern: '^[0-9a-fA-F]{24}$' }))
@@ -34,15 +34,15 @@ export const ObjectId = Type.Transform(Type.String({ pattern: '^[0-9a-fA-F]{24}$
 
 export type TypebooxeDocument<
   T extends TObject,
-  Plugins extends readonly TypebooxePlugin<TObject>[]
+  Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = mongoose.Document<
   unknown,
   {},
   TypebooxeRaw<T, Plugins>
->
+> & Methods<T, Plugins>
 
 export type TypebooxeRaw<
-  T extends TObject,
+  T extends TSchema,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = MergeTypeArray<[Static<T>, ...ExtractPluginTypes<Plugins>]>
 
@@ -65,9 +65,9 @@ export type ExtractPluginTypes<
   Plugins extends readonly TypebooxePlugin<TObject>[]
 > = {
     [K in keyof Plugins]:
-      Plugins[K] extends TypebooxePlugin<infer P>
-      ? Static<P>
-      : never
+    Plugins[K] extends TypebooxePlugin<infer P>
+    ? Static<P>
+    : never
   }
 
 export type MergeTypeArray<

@@ -8,7 +8,7 @@ export function TypebooxeRef<T extends TObject>(
 
   const object : T = model.$typebooxe
 
-  return Type.Partial(object, {
+  return Type.Union([object, Type.Pick(object, ["id"])], {
     $id : "ref@" + object.$id
   })
 }

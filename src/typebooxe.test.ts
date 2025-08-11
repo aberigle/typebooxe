@@ -2,6 +2,7 @@ import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { typebooxe } from "./typebooxe";
+import { TypebooxeRef } from "./reference";
 
 describe('typebooxe', () => {
   describe('model', () => {
@@ -21,7 +22,7 @@ describe('typebooxe', () => {
       const TestType = Type.Object({ test: Type.String(), date: Type.Date() }, { $id: "Test" })
       const TestModel = typebooxe(TestType)
 
-      let item = new TestModel({ test: "hola", date : new Date("2024-01-01") })
+      let item = new TestModel({ test: "hola", date: new Date("2024-01-01") })
       expect(item.test).toBe("hola")
 
       const object = item.cast()
@@ -62,16 +63,16 @@ describe('typebooxe', () => {
     })
 
     it('handles ref objectids', async () => {
-      const JobType    = Type.Object({ name: Type.String() }, { $id: 'Job' })
+      const JobType = Type.Object({ name: Type.String() }, { $id: 'Job' })
+      const JobModel = typebooxe(JobType)
+
       const PersonType = Type.Object({
         name: Type.String(),
-        job: Type.Ref(JobType)
+        job: TypebooxeRef(JobModel)
       }, { $id: "Person" })
-
-      const JobModel    = typebooxe(JobType)
       const PersonModel = typebooxe(PersonType)
 
-      let job    = new JobModel({ name: 'developer' })
+      let job = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
 
       person.job = job
@@ -81,22 +82,23 @@ describe('typebooxe', () => {
 
       // @ts-ignore
       person.job = job._id
-
       result = person.cast()
-      expect(result.job).toBeUndefined()
+
+      expect(result.job).toBeObject()
     })
 
     it('casts union with ref to string when not populated', async () => {
-      const JobType    = Type.Object({ name: Type.String() }, { $id: 'Job' })
+      const JobType = Type.Object({ id: Type.String(), name: Type.String() }, { $id: 'Job' })
+
+      const JobModel = typebooxe(JobType)
       const PersonType = Type.Object({
-        name : Type.String(),
-        job  : Type.Union([Type.Ref(JobType), Type.String()])
+        name: Type.String(),
+        job: TypebooxeRef(JobModel)
       }, { $id: "Person" })
 
-      const JobModel    = typebooxe(JobType)
       const PersonModel = typebooxe(PersonType)
 
-      let job    = new JobModel({ name: 'developer' })
+      let job = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
 
       person.job = job
@@ -108,7 +110,7 @@ describe('typebooxe', () => {
       person.job = job._id
 
       result = person.cast()
-      expect(result.job).toBe(job._id.toHexString())
+      expect(result.job.id).toBe(job._id.toHexString())
     })
 
   })
