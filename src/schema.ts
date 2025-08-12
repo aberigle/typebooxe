@@ -1,6 +1,6 @@
 import { Static, TSchema, Type, type TObject } from "@sinclair/typebox"
 import { Value, ValueError, ValueErrorType, ValuePointer } from '@sinclair/typebox/value'
-import type { ResolveSchemaOptions, Schema, SchemaOptions } from "mongoose"
+import type { Document, ResolveSchemaOptions, Schema, SchemaOptions } from "mongoose"
 import mongoose from "mongoose/lib/index.js"
 import { createDefinition } from "./definition"
 import { useModels } from "./typebooxe"
@@ -47,10 +47,12 @@ export function createSchema<
   const references = Object.values(useModels())
   const castType = Type.Intersect(castTypes)
   result.methods.cast = function <M extends TSchema = T>(type: M = castType as unknown as M) {
+    const doc : Document = this
     return castItem(
       type,
-      this.toObject({
-        flattenObjectIds: true
+      doc.toObject({
+        flattenObjectIds: true,
+        minimize : false
       }),
       references
     )

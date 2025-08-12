@@ -32,6 +32,20 @@ describe('typebooxe', () => {
       expect(object._id).toBeUndefined()
     })
 
+    it('casts empty objects', async () => {
+      const TestType = Type.Object({ test: Type.String(), object: Type.Object({
+        field: Type.Optional(Type.String())
+      }) }, { $id: "Test" })
+      const TestModel = typebooxe(TestType)
+
+      let item = new TestModel({ test: "hola", object: {} })
+      expect(item.test).toBe("hola")
+      expect(item.object).toMatchObject({})
+
+      const casted = item.cast()
+      expect(casted.object).toMatchObject({})
+    })
+
     it("casts to compatible types", async () => {
       const TestType = Type.Object({ test: Type.String(), date: Type.Date(), secret: Type.String() }, { $id: "Test" })
       const TestModel = typebooxe(TestType)
