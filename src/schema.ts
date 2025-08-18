@@ -47,12 +47,12 @@ export function createSchema<
   const references = Object.values(useModels())
   const castType = Type.Intersect(castTypes)
   result.methods.cast = function <M extends TSchema = T>(type: M = castType as unknown as M) {
-    const doc : Document = this
+    const doc: Document = this
     return castItem(
       type,
       doc.toObject({
         flattenObjectIds: true,
-        minimize : false
+        minimize: false
       }),
       references
     )
@@ -71,6 +71,7 @@ function castItem(
   item: any,
   references: TSchema[] = []
 ) {
+
   item = reduceErrors(item, Value.Errors(def, references, item))
   // for (
   //   let error of Value.Errors(def, references, item)
@@ -86,7 +87,10 @@ function reduceErrors(item: any, errors: Value.ValueErrorIterator) {
   return item
 }
 
-function handleError(item: any, error: ValueError) {
+function handleError(
+  item: any,
+  error: ValueError) {
+
   switch (error.type) {
     case ValueErrorType.Object: // object was expected
       if (// a reference not populated, we return the id nested as an object

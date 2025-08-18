@@ -22,7 +22,7 @@ describe('typebooxe', () => {
         job: TypebooxeRef(JobModel)
       }, { $id: "Person" }))
 
-      let job    = new JobModel({ name: 'developer' })
+      let job = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
 
       person.job = job
@@ -44,12 +44,12 @@ describe('typebooxe', () => {
       }, { $id: 'Job' }))
 
       const PersonModel = typebooxe(Type.Object({
-        id : Type.String(),
+        id: Type.String(),
         name: Type.String(),
         job: TypebooxeRef(JobModel)
       }, { $id: "Person" }))
 
-      let job    = new JobModel({ name: 'developer' })
+      let job = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
 
       person.job = job
@@ -62,6 +62,35 @@ describe('typebooxe', () => {
 
       result = person.cast()
       expect(result.job.id).toBe(job._id.toHexString())
+    })
+
+    it('casts only defined fields', async () => {
+      const JobModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String()
+      }, { $id: 'Job' }))
+
+      const PersonModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        job: TypebooxeRef(JobModel)
+      }, { $id: "Person" }))
+
+      let job = new JobModel({ name: 'developer' })
+      let person = new PersonModel({ name: 'aberigle' })
+
+      person.job = job
+
+      const PublicType = Type.Intersect([
+        Type.Omit(PersonModel.$typebooxe,["job"]),
+        Type.Object({ job: Type.Pick(JobModel.$typebooxe, ["name"]) })
+      ])
+
+      let result = person.cast(PublicType)
+
+      console.log(result)
+      expect(result.job.id).toBeUndefined()
+
     })
 
   })
