@@ -82,15 +82,42 @@ describe('typebooxe', () => {
       person.job = job
 
       const PublicType = Type.Intersect([
-        Type.Omit(PersonModel.$typebooxe,["job"]),
+        Type.Omit(PersonModel.$typebooxe, ["job"]),
         Type.Object({ job: Type.Pick(JobModel.$typebooxe, ["name"]) })
       ])
 
       let result = person.cast(PublicType)
-
       console.log(result)
-      expect(result.job.id).toBeUndefined()
 
+      // @ts-ignore
+      expect(result.job.id).toBeUndefined()
+    })
+
+    it('casts reference arrays', async () => {
+      const JobModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        salary: Type.Number()
+      }, { $id: 'Job' }))
+
+      const PersonModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        jobs: Type.Array(TypebooxeRef(JobModel))
+      }, { $id: "Person" }))
+
+      let job = new JobModel({ name: 'developer', salary: 30 })
+      let job2 = new JobModel({ name: 'QA', salary: 50 })
+      let person = new PersonModel({ name: 'aberigle', jobs: [job, job2] })
+
+      const PublicType = Type.Intersect([
+        Type.Omit(PersonModel.$typebooxe, ["jobs"]),
+        Type.Optional(Type.Object({ jobs: Type.Array(Type.Pick(JobModel.$typebooxe, ["name"])) }))
+      ])
+
+      const result = person.cast(PublicType)
+      console.log(result)
+      expect(result.jobs[0]).toEqual({ name: "developer" })
     })
 
   })

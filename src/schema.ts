@@ -90,7 +90,6 @@ function reduceErrors(item: any, errors: Value.ValueErrorIterator) {
 function handleError(
   item: any,
   error: ValueError) {
-
   switch (error.type) {
     case ValueErrorType.Object: // object was expected
       if (// a reference not populated, we return the id nested as an object
@@ -100,7 +99,7 @@ function handleError(
 
       if (mongoose.isValidObjectId(error.value)) // we have an objectid
         return Value.Patch(item, [{ type: "delete", path: error.path }])
-
+      return item
     case ValueErrorType.String: // we want to maintain the id
       if (error.path.endsWith("/id")) {
         const id = ValuePointer.Get(item, error.path.replace("id", "_id"))
