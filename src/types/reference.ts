@@ -1,5 +1,5 @@
 import { TObject, Type } from "@sinclair/typebox";
-import { TypebooxeModel } from "./types";
+import { TypebooxeModel } from "../types";
 
 export function TypebooxeRef<T extends TObject>(
   model : TypebooxeModel<T>

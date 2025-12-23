@@ -2,10 +2,10 @@ import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { TypebooxeRef } from "./reference";
-import { typebooxe } from "./typebooxe";
+import { typebooxe } from "../typebooxe";
 
 describe('typebooxe', () => {
-  describe('model', () => {
+  describe('types', () => {
     beforeEach(() => {
       for (let key of Object.keys(mongoose.models)) delete mongoose.models[key]
     })
@@ -87,7 +87,6 @@ describe('typebooxe', () => {
       ])
 
       let result = person.cast(PublicType)
-      console.log(result)
 
       // @ts-ignore
       expect(result.job.id).toBeUndefined()
@@ -116,7 +115,6 @@ describe('typebooxe', () => {
       ])
 
       const result = person.cast(PublicType)
-      console.log(result)
       expect(result.jobs[0]).toEqual({ name: "developer" })
     })
 
