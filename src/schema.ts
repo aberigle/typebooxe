@@ -73,11 +73,9 @@ function castItem(
 ) {
 
   item = reduceErrors(item, Value.Errors(def, references, item))
-  // for (
-  //   let error of Value.Errors(def, references, item)
-  // ) item = handleError(item, error)
 
-  return Value.Clean(def, references, item)
+  const cleaned = Value.Clean(def, references, item)
+  return Value.Encode(def, references, cleaned)
 }
 
 function reduceErrors(item: any, errors: Value.ValueErrorIterator) {
