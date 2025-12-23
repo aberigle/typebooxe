@@ -11,7 +11,7 @@ describe('typebooxe', () => {
   describe('plugin', () => {
     it('adds fields', () => {
       const Plugin  = typebooxePlugin(Type.Object({ number: Type.Number() }))
-      const Plugin2 = typebooxePlugin(Type.Object({ date: Type.Number() }))
+      const Plugin2 = typebooxePlugin(Type.Object({ date: Type.Date() }))
 
       const TestModel = typebooxe(Type.Object({
         test: Type.String()
@@ -19,7 +19,7 @@ describe('typebooxe', () => {
         plugins: [Plugin, Plugin2]
       })
 
-      const model = new TestModel({ test: "hola", number : 3})
+      const model = new TestModel({ test: "hola", number: 3, date: new Date })
       expect(model.number).toBe(3)
 
       const object = model.cast()
