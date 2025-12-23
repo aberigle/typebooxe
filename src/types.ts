@@ -39,7 +39,7 @@ export type TypebooxeDocument<
   unknown,
   {},
   TypebooxeRaw<T, Plugins>
-> & Methods<T, Plugins>
+> & Methods<T, Plugins> & Static<T>
 
 export type TypebooxeRaw<
   T extends TSchema,

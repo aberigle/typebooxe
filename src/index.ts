@@ -5,7 +5,8 @@ export {
   TypebooxeOptions
 } from "./types"
 
-export { TypebooxeRef } from "./reference"
+export { TypebooxeRef } from "./types/reference"
+export { PrefixedId } from "./types/prefixed-id"
 
 export {
   typebooxePlugin,

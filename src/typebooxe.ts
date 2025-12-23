@@ -27,7 +27,7 @@ export function typebooxe<
 
   const name : string = object.$id as string
   definitions[name] = object
-  const schema    = createSchema<T, Plugins>(object, options)
+  const schema  = createSchema<T, Plugins>(object, options)
   schemas[name] = schema
 
   const model = goose.model(
