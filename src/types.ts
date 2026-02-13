@@ -1,25 +1,30 @@
 import { Static, TObject, TSchema, Type } from "@sinclair/typebox"
 import mongoose, { Types } from "mongoose"
 
-export type MongooseIndexOption = {
-  index: mongoose.IndexDefinition,
-  options?: mongoose.IndexOptions
+export type MongooseIndexOption= {
+  index    : mongoose.IndexDefinition,
+  options? : mongoose.IndexOptions
 }
 
-export type DefinitionOptions = {
-  getters?: Record<string, (value: any) => any>
-  setters?: Record<string, (value: any, priorVal?: any) => any>
+export type DefinitionOptions<T extends TObject> = {
+  getters?:  {
+    [K in keyof Static<T>]?: (value: Static<T>[K]) => Static<T>[K]
+  }
+  setters?: {
+    [K in keyof Static<T>]?: (value: Static<T>[K], priorVal?: Static<T>[K]) => Static<T>[K]
+  }
 }
 
 export type TypebooxeOptions<
-  Plugins extends readonly TypebooxePlugin<TObject>[]
+  T extends TObject,
+  Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = {
   schema?: mongoose.SchemaDefinition,
   options?: mongoose.SchemaOptions,
   methods?: Record<string, Function>,
   plugins?: Plugins,
   indexes?: Array<MongooseIndexOption>,
-} & DefinitionOptions
+} & DefinitionOptions<T>
 
 export type Methods<
   T extends TObject,
@@ -36,7 +41,7 @@ export type TypebooxeDocument<
   T extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = mongoose.Document<
-  unknown,
+  Types.ObjectId,
   {},
   TypebooxeRaw<T, Plugins>
 > & Methods<T, Plugins> & Static<T>
@@ -50,10 +55,11 @@ export type TypebooxeModel<
   T extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = mongoose.Model<
-  TypebooxeRaw<T, Plugins> & { _id: Types.ObjectId },
+  TypebooxeRaw<T, Plugins>,// & { _id: Types.ObjectId },
   {},
   Methods<T, Plugins>,
-  {}
+  {},
+  TypebooxeDocument<T, Plugins>
 > & { $typebooxe: T }
 
 export type TypebooxePlugin<T extends TObject> = {

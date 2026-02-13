@@ -58,12 +58,12 @@ function parseReference(
   }
 }
 
-function parseObject(
-  object: TObject,
+function parseObject<T extends TObject>(
+  object: T,
   {
     getters,
     setters
-  }: DefinitionOptions = {}
+  }: DefinitionOptions<T> = {}
 ) {
   const schema : SchemaDefinition = {}
 
@@ -89,9 +89,9 @@ function parseObject(
   return schema
 }
 
-export function createDefinition(
-  object  : TObject,
-  options : DefinitionOptions = {}
+export function createDefinition<T extends TObject>(
+  object  : T,
+  options : DefinitionOptions<T> = {}
 ) {
   return parseObject(object, options)
 }

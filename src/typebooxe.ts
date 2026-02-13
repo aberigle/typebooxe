@@ -20,7 +20,7 @@ export function typebooxe<
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 >(
   object  : T,
-  options : TypebooxeOptions<[...Plugins]> = {}
+  options: TypebooxeOptions<T, [...Plugins]> = {}
 ) {
 
   if (!("$id" in object)) throw new Error("Missing $id field")
@@ -44,7 +44,7 @@ export function typebooxePlugin<
   T extends TObject
 >(
   object: T,
-  options: TypebooxeOptions<[]> = {}
+  options: TypebooxeOptions<T, []> = {}
 ): TypebooxePlugin<T> {
   const plugin = createSchema<T>(object, options)
 
