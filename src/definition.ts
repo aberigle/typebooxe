@@ -3,12 +3,14 @@ import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
 import { DefinitionOptions } from "./types"
 
 function parseProperty(
-  field : TSchema
+  field: TSchema
 ): SchemaTypeOptions<any> {
 
   let def = {
     required: false
   }
+
+  if (field.$id?.includes("ref@")) return parseReference(field)
 
   switch (field.type) {
     case 'string'  : return { ...def, type: String }
@@ -16,31 +18,31 @@ function parseProperty(
     case 'integer' : return { ...def, type: Number }
     case 'boolean' : return { ...def, type: Boolean }
     case 'Date'    : return { ...def, type: Date }
-    case 'object'  : return parseObject(field as TObject)
-    case 'array'   : return [parseProperty(field.items)]
+    case 'object'  : return { ...def, type: new Schema(parseObject(field as TObject)) }
+    case 'array'   : return { ...def, type : [parseProperty(field.items)] }
   }
 
-  const key    = Symbol.for("TypeBox.Kind")
-  const symbol = key in field? field[key] : ''
+  const key = Symbol.for("TypeBox.Kind")
+  const symbol = key in field ? field[key] : ''
 
-  switch(symbol) {
-    case 'Ref'    : return {
+  switch (symbol) {
+    case 'Ref': return {
       ...def,
-      type : Schema.Types.ObjectId,
-      ref  : field.$ref
+      type: Schema.Types.ObjectId,
+      ref: field.$ref
     }
-    case 'Any'   : return {
+    case 'Any': return {
       ...def,
-      type : Schema.Types.Mixed
+      type: Schema.Types.Mixed
     }
-    case 'Union' :
+    case 'Union':
       if (field.$id?.includes("ref@")) return parseReference(field)
       let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
       if (ref) return parseProperty(ref)
       return {
         ...def,
-        type : String,
-        enum : field.anyOf.map(value => value.const)
+        type: String,
+        enum: field.anyOf.map(value => value.const)
       }
   }
 
@@ -48,13 +50,13 @@ function parseProperty(
 }
 
 function parseReference(
-  field : TSchema
-) : SchemaTypeOptions<any> {
+  field: TSchema
+): SchemaTypeOptions<any> {
   const model = field.$id?.split("ref@").pop()
 
   return {
-    type : Schema.Types.ObjectId,
-    ref : model
+    type: Schema.Types.ObjectId,
+    ref: model
   }
 }
 
@@ -65,9 +67,7 @@ function parseObject<T extends TObject>(
     setters
   }: DefinitionOptions<T> = {}
 ) {
-  const schema : SchemaDefinition = {}
-
-  if (object.$id?.includes("ref@")) return parseReference(object)
+  const schema: SchemaDefinition = {}
 
   for (const key in object.properties) {
     if (key == "id") continue
@@ -90,8 +90,8 @@ function parseObject<T extends TObject>(
 }
 
 export function createDefinition<T extends TObject>(
-  object  : T,
-  options : DefinitionOptions<T> = {}
+  object: T,
+  options: DefinitionOptions<T> = {}
 ) {
   return parseObject(object, options)
 }

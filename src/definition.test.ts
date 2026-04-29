@@ -20,8 +20,8 @@ describe('typebooxe', () => {
 
     it("number", () => {
       const def = definition({
-        number : Type.Number(),
-        integer : Type.Integer()
+        number: Type.Number(),
+        integer: Type.Integer()
       })
 
       expect(def.number).toMatchObject({ type: Number })
@@ -29,53 +29,53 @@ describe('typebooxe', () => {
     })
 
     it("boolean", () => {
-      const def = definition({ test : Type.Boolean() })
+      const def = definition({ test: Type.Boolean() })
       expect(def.test).toMatchObject({ type: Boolean })
     })
 
     it("dates", () => {
-      const def = definition({ test : Type.Date() })
+      const def = definition({ test: Type.Date() })
       expect(def.test).toMatchObject({ type: Date })
     })
 
     it("optionals", () => {
       const def = definition({
-        mandatory : Type.String(),
+        mandatory: Type.String(),
         optional: Type.Optional(Type.String())
       })
-      expect(def.mandatory).toMatchObject({ type : String, required:true })
+      expect(def.mandatory).toMatchObject({ type: String, required: true })
       expect(def.optional).toMatchObject({ type: String, required: false })
     })
 
     it("defaults", () => {
       const def = definition({
-        flag   : Type.Boolean({ default: false }),
-        text   : Type.String({ default: "hello" }),
-        number : Type.Number({ default: 27 })
+        flag: Type.Boolean({ default: false }),
+        text: Type.String({ default: "hello" }),
+        number: Type.Number({ default: 27 })
       })
 
       expect(def.flag).toMatchObject({ type: Boolean, default: false })
-      expect(def.text).toMatchObject({ type : String, default : "hello" })
-      expect(def.number).toMatchObject({ type : Number, default : 27 })
+      expect(def.text).toMatchObject({ type: String, default: "hello" })
+      expect(def.number).toMatchObject({ type: Number, default: 27 })
     })
 
-    it("any (Mixed)",  () => {
+    it("any (Mixed)", () => {
       const def = definition({
-        test : Type.Any()
+        test: Type.Any()
       })
 
       expect(def.test).toMatchObject({ type: Schema.Types.Mixed })
     })
 
-    it("refs",  () => {
+    it("refs", () => {
       const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
       const def = definition({
         reference: Type.Optional(Type.Ref(tReferenced)),
-      },{
-        references : [tReferenced]
+      }, {
+        references: [tReferenced]
       })
 
-      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref : 'Referenced' })
+      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref: 'Referenced' })
     })
 
     it("enums", () => {
@@ -85,48 +85,66 @@ describe('typebooxe', () => {
       }
 
       const def = definition({
-        field : Type.Enum(TestEnum)
+        field: Type.Enum(TestEnum)
       })
 
       expect(def.field).toMatchObject({
-        type : String, enum : ["ONE", "TWO"]
+        type: String, enum: ["ONE", "TWO"]
       })
 
     })
 
     it("objects", () => {
       const def = definition({
-        test : Type.Object({
-          field : Type.String()
+        test: Type.Object({
+          field: Type.String()
         })
       })
 
-      expect(def.test).toStrictEqual({
-        field: { type: String, required : true }
+      expect(def.test.required).toBeTrue()
+      expect(def.test.type.obj).toMatchObject({
+        field: {
+          type: String,
+          required: true
+        }
       })
+    })
+
+    it("optional objects", () => {
+      const def = definition({
+        test: Type.Optional(
+          Type.Object({
+            field: Type.String()
+          }))
+      })
+
+      expect(def.test.required).toBeFalse()
     })
 
     it("arrays", () => {
       const def = definition({
-        text : Type.Array(Type.String()),
-        objects : Type.Array(Type.Object({
-          test  : Type.String()
-        }))
+        text: Type.Array(Type.String()),
+        objects: Type.Array(
+          Type.Object({
+            test: Type.String()
+          })
+        )
       })
 
-      expect(def.text).toMatchObject([{ type : String }])
-      expect(def.objects).toMatchObject([{ test: { type: String } }])
+      expect(def.text.type).toMatchObject([{ type: String }])
+      expect(def.objects.type).toBeArray()
+      expect(def.objects.type[0].type.obj).toMatchObject({ test: { type: String } })
     })
 
     it("not populated refs", () => {
       const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
       const def = definition({
         reference: Type.Union([Type.Ref(tReferenced), Type.String()]),
-      },{
-        references : [tReferenced]
+      }, {
+        references: [tReferenced]
       })
 
-      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref : 'Referenced' })
+      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref: 'Referenced' })
     })
   })
 
