@@ -94,7 +94,6 @@ describe('typebooxe', () => {
       let result = person.cast()
       expect(result.job).toMatchObject({ name: 'developer' })
 
-      // @ts-ignore
       person.job = job._id
       result = person.cast()
 
@@ -102,17 +101,16 @@ describe('typebooxe', () => {
     })
 
     it('casts union with ref to string when not populated', async () => {
-      const JobType = Type.Object({ id: Type.String(), name: Type.String() }, { $id: 'Job' })
-
+      const JobType  = Type.Object({ id: Type.String(), name: Type.String() }, { $id: 'Job' })
       const JobModel = typebooxe(JobType)
+
       const PersonType = Type.Object({
         name: Type.String(),
         job: TypebooxeRef(JobModel)
       }, { $id: "Person" })
-
       const PersonModel = typebooxe(PersonType)
 
-      let job = new JobModel({ name: 'developer' })
+      let job    = new JobModel({ name: 'developer' })
       let person = new PersonModel({ name: 'aberigle' })
 
       person.job = job
@@ -120,11 +118,11 @@ describe('typebooxe', () => {
       let result = person.cast()
       expect(result.job).toMatchObject({ name: 'developer' })
 
-      // @ts-ignore
       person.job = job._id
 
       result = person.cast()
       expect(result.job.id).toBe(job._id.toHexString())
+
     })
 
   })
