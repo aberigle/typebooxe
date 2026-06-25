@@ -7,6 +7,7 @@ export {
 
 export { PrefixedId } from "./fields/prefixed-id"
 export { ModelReference } from "./fields/reference"
+export { SelfReference } from './fields/self-reference'
 
 export {
   typebooxePlugin,

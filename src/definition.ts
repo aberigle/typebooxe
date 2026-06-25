@@ -1,4 +1,4 @@
-import { TOptional, type TObject, type TSchema } from "@sinclair/typebox"
+import { type TObject, type TSchema } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
 import { DefinitionOptions } from "./types"
 
