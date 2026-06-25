@@ -6,7 +6,6 @@
     ],
     "removeComments": false,
     "module": "commonjs",
-    "moduleResolution": "node",
     "newLine": "LF",
     "declaration": true,
     "experimentalDecorators": true,
@@ -21,6 +20,9 @@
     "skipLibCheck": true,
     "rootDir": "./src",
     "baseUrl": ".",
+    "types": [
+      "bun"
+    ]
   },
   "include": [
     "src/**/*.ts"
