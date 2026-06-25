@@ -288,4 +288,33 @@ describe('typebooxe', () => {
     expect(result.parent).toMatchObject({ name: 'parent' })
     expect(result.parent.id).toBeUndefined()
   })
+
+  it('handles a cross-model ref to a self-referential model', async () => {
+    const PersonModel = typebooxe(Type.Recursive(This =>
+      Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        parent: Type.Optional(This)
+      }),
+      { $id: "Person" }
+    ))
+
+    const TeamModel = typebooxe(Type.Object({
+      id: Type.String(),
+      name: Type.String(),
+      lead: ModelReference(PersonModel)
+    }, { $id: "Team" }))
+
+    let grandparent = new PersonModel({ name: 'grandparent' })
+    let parent = new PersonModel({ name: 'parent', parent: grandparent })
+    let team = new TeamModel({ name: 'team', lead: parent })
+
+    let result = team.cast()
+    expect(result.lead).toMatchObject({ name: 'parent' })
+    expect(result.lead.parent).toMatchObject({ name: 'grandparent' })
+
+    team.lead = parent._id
+    result = team.cast()
+    expect(result.lead).toMatchObject({ id: parent._id.toHexString() })
+  })
 })

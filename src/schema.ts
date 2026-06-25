@@ -8,7 +8,7 @@ import mongoose from "mongoose/lib/index.js"
 import { createDefinition } from "./definition"
 import { useModels } from "./typebooxe"
 import { TypebooxeRaw, type TypebooxeOptions, type TypebooxePlugin } from "./types"
-import { ReferenceType } from "./types/reference"
+import { ReferenceType } from "./fields/reference"
 
 export function createSchema<
   T extends TObject,

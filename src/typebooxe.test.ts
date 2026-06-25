@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { typebooxe } from "./typebooxe";
-import { ModelReference } from "./types/reference";
+import { ModelReference } from "./fields/reference";
 
 describe('typebooxe', () => {
   describe('model', () => {

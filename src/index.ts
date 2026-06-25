@@ -5,8 +5,8 @@ export {
   TypebooxeOptions
 } from "./types"
 
-export { PrefixedId } from "./types/prefixed-id"
-export { ModelReference } from "./types/reference"
+export { PrefixedId } from "./fields/prefixed-id"
+export { ModelReference } from "./fields/reference"
 
 export {
   typebooxePlugin,
