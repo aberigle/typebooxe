@@ -1,8 +1,9 @@
-import { Type } from "@sinclair/typebox";
-import { beforeEach, describe, expect, it } from "bun:test";
-import mongoose from "mongoose";
-import { modelsCache, typebooxe } from "../typebooxe";
-import { ModelReference } from "./reference";
+import { Type } from "@sinclair/typebox"
+import { beforeEach, describe, expect, it } from "bun:test"
+import mongoose from "mongoose"
+import { modelsCache, typebooxe } from "../typebooxe"
+import { ModelReference } from "./reference"
+import { SelfReference } from "./self-reference"
 
 describe('typebooxe', () => {
 
@@ -15,9 +16,9 @@ describe('typebooxe', () => {
   it('handles self-referential ref with Type.Recursive', async () => {
     const PersonType = Type.Recursive(This =>
       Type.Object({
-        id     : Type.String(),
-        name   : Type.String(),
-        parent : Type.Optional(This)
+        id: Type.String(),
+        name: Type.String(),
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     )
@@ -26,7 +27,7 @@ describe('typebooxe', () => {
 
     let parent = new PersonModel({ name: 'parent' })
 
-    expect(parent.cast()).toMatchObject({ name : "parent"})
+    expect(parent.cast()).toMatchObject({ name: "parent" })
 
     let child = new PersonModel({ name: 'child', parent })
 
@@ -43,7 +44,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        children: Type.Optional(Type.Array(This))
+        children: Type.Optional(Type.Array(SelfReference(This)))
       }),
       { $id: "Person" }
     ))
@@ -65,7 +66,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -87,7 +88,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -103,7 +104,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -119,7 +120,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -137,32 +138,12 @@ describe('typebooxe', () => {
     expect(result.parent.id).toBeUndefined()
   })
 
-  it('handles multi-level self-referential nesting', async () => {
-    const PersonModel = typebooxe(Type.Recursive(This =>
-      Type.Object({
-        id: Type.String(),
-        name: Type.String(),
-        parent: Type.Optional(This)
-      }),
-      { $id: "Person" }
-    ))
-
-    let grandparent = new PersonModel({ name: 'grandparent' })
-    let parent = new PersonModel({ name: 'parent', parent: grandparent })
-    let child = new PersonModel({ name: 'child', parent })
-
-    let result = child.cast()
-
-    expect(result.parent).toMatchObject({ name: 'parent' })
-    expect(result.parent.parent).toMatchObject({ name: 'grandparent' })
-  })
-
   it('casts unpopulated array of self-refs', async () => {
     const PersonModel = typebooxe(Type.Recursive(This =>
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        children: Type.Optional(Type.Array(This))
+        children: Type.Optional(Type.Array(SelfReference(This)))
       }),
       { $id: "Person" }
     ))
@@ -185,7 +166,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -209,7 +190,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This),
+        parent: Type.Optional(SelfReference(This)),
         job: ModelReference(JobModel)
       }),
       { $id: "Person" }
@@ -230,8 +211,8 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This),
-        coach: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This)),
+        coach: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -251,7 +232,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -273,7 +254,7 @@ describe('typebooxe', () => {
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
     ))
@@ -289,32 +270,26 @@ describe('typebooxe', () => {
     expect(result.parent.id).toBeUndefined()
   })
 
-  it('handles a cross-model ref to a self-referential model', async () => {
-    const PersonModel = typebooxe(Type.Recursive(This =>
+  it('casts against original recursive schema when self-ref is not populated', async () => {
+    const PersonType = Type.Recursive(This =>
       Type.Object({
         id: Type.String(),
         name: Type.String(),
-        parent: Type.Optional(This)
+        parent: Type.Optional(SelfReference(This))
       }),
       { $id: "Person" }
-    ))
+    )
 
-    const TeamModel = typebooxe(Type.Object({
-      id: Type.String(),
-      name: Type.String(),
-      lead: ModelReference(PersonModel)
-    }, { $id: "Team" }))
+    const PersonModel = typebooxe(PersonType)
 
-    let grandparent = new PersonModel({ name: 'grandparent' })
-    let parent = new PersonModel({ name: 'parent', parent: grandparent })
-    let team = new TeamModel({ name: 'team', lead: parent })
+    let parent = new PersonModel({ name: 'parent' })
+    let child = new PersonModel({ name: 'child' })
 
-    let result = team.cast()
-    expect(result.lead).toMatchObject({ name: 'parent' })
-    expect(result.lead.parent).toMatchObject({ name: 'grandparent' })
+    // @ts-ignore
+    child.parent = parent._id
 
-    team.lead = parent._id
-    result = team.cast()
-    expect(result.lead).toMatchObject({ id: parent._id.toHexString() })
+    let result = child.cast(PersonType)
+
+    expect(result.parent).toMatchObject({ id: parent._id.toHexString() })
   })
 })

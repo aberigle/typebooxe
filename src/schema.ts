@@ -1,4 +1,4 @@
-import { Kind, Static, TObject, TSchema, Type } from "@sinclair/typebox"
+import { Kind, Static, TObject, TSchema, TUnion, Type, Union } from "@sinclair/typebox"
 import { Value, ValueError, ValueErrorType, ValuePointer } from '@sinclair/typebox/value'
 import { type Document, type ResolveSchemaOptions, type Schema, type SchemaOptions } from "mongoose"
 
@@ -82,6 +82,11 @@ function generateCastType(
     return Type.Array(generateCastType(schema.items, top)) as TSchema
 
   if (
+    schema[Kind] === 'Union' &&
+    schema.$id?.startsWith("ref@")
+  ) return ReferenceType(top, top.$id as string)
+
+  if (
     schema.type !== 'object' ||
     schema.$id?.includes("ref@")
   ) return schema
@@ -94,7 +99,6 @@ function generateCastType(
     if (!object.required?.includes(key)) fixed = Type.Optional(fixed)
     result[key] = fixed
   }
-
 
   return Type.Object(result)
 }

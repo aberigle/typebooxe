@@ -1,7 +1,7 @@
-import { TObject, Type } from "@sinclair/typebox"
+import { TObject, TSchema, Type } from "@sinclair/typebox"
 import { TypebooxeModel } from "../types"
 
-export function ModelReference<T extends TObject>(
+export function ModelReference<T extends TObject = TObject>(
   model: TypebooxeModel<T>
 ) {
   if (!("$typebooxe" in model))
@@ -14,9 +14,9 @@ export function ModelReference<T extends TObject>(
   return ReferenceType(object, ref as string)
 }
 
-export function ReferenceType<T extends TObject>(
-  object : T,
-  ref : string
+export function ReferenceType<T extends TSchema>(
+  object: T,
+  ref: string
 ) {
   return Type.Intersect([
     Type.Optional(Type.Partial(object)),
