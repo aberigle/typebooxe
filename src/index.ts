@@ -1,8 +1,8 @@
 import { typebooxe } from "./typebooxe"
 export {
-  TypebooxeDocument,
-  TypebooxeModel,
-  TypebooxeOptions
+  type TypebooxeDocument,
+  type TypebooxeModel,
+  type TypebooxeOptions
 } from "./types"
 
 export { PrefixedId } from "./fields/prefixed-id"
