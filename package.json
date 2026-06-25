@@ -5,7 +5,7 @@
   "type": "module",
   "types": "src/index.ts",
   "files": [
-    "src/"
+    "src/**/*"
   ],
   "scripts": {
     "build:types": "tsc --project tsconfig.dts.json",
@@ -20,6 +20,6 @@
   },
   "peerDependencies": {
     "@sinclair/typebox": "^0.34.49",
-    "mongoose": "~8.7.0"
+    "mongoose": "^9.6.1"
   }
 }
