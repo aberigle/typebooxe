@@ -2,16 +2,16 @@
 
 [mongoose](https://mongoosejs.com/) meets [TypeBox](https://github.com/sinclairzx81/typebox)
 
-[english](README.en.md)
+[español](README.md)
 
-## Definir un Schema con typebooxe
+## Defining a Schema with typebooxe
 
 ```typescript
 const Person = Type.Object({
   name: Type.String(),
   age : Type.Number()
 }, {
-  $id: "Person"  // usado como nombre de la colección mongoose
+  $id: "Person"  // used as the mongoose collection name
 })
 
 type PersonType = Static<typeof Person>
@@ -20,15 +20,15 @@ const PersonModel = typebooxe(Person)
 ```
 
 ```typescript
-// Crear un documento
+// Create a document
 const person = await PersonModel.create({ name: "aberigle", age: 34 })
 
-console.log(person)       // Documento mongoose (incluye _id, __v, etc.)
-console.log(person.cast()) // PersonType — schema validado sin propiedades de mongoose
+console.log(person)       // Mongoose document (includes _id, __v, etc.)
+console.log(person.cast()) // PersonType — validated schema without mongoose internals
 // { name: "aberigle", age: 34 }
 ```
 
-## Tipos Soportados
+## Supported Types
 
 | TypeBox | Mongoose |
 |---------|----------|
@@ -39,7 +39,7 @@ console.log(person.cast()) // PersonType — schema validado sin propiedades de 
 | `Type.Date()`    | `{ type: Date, required: true }` |
 | `Type.Any()`     | `{ type: Schema.Types.Mixed }` |
 
-### Objetos y Arrays
+### Objects and Arrays
 
 ```typescript
 Type.Object({ field: Type.String() })
@@ -52,9 +52,9 @@ Type.Array(Type.Object({ field: Type.String() }))
 // ⇒ [{ field: { type: String, required: true } }]
 ```
 
-### Campos Opcionales
+### Optional Fields
 
-Por defecto todos los campos son requeridos. Usa `Type.Optional()` para hacerlos opcionales:
+All fields are required by default. Use `Type.Optional()` to make them optional:
 
 ```typescript
 Type.Optional(Type.String())  // ⇒ { type: String, required: false }
@@ -71,17 +71,17 @@ enum JobTypes {
 Type.Enum(JobTypes)  // ⇒ { type: String, enum: ["developer", "designer"] }
 ```
 
-## El campo `_id`
+## The `_id` Field
 
-MongoDB genera un `_id` automáticamente. Si no lo defines en el schema, no se serializa.
+MongoDB auto-generates an `_id`. If you don't define it in the schema, it won't be serialized.
 
 ```typescript
-const Person = Type.Object({ id: Type.String() })  // tendrá el _id de mongo
+const Person = Type.Object({ id: Type.String() })  // will hold the mongo _id
 ```
 
-## Referencias entre modelos
+## Model References
 
-Usa `ModelReference(modelo)` para crear relaciones. El campo acepta un documento populado, un string ID, o un ObjectId de mongoose:
+Use `ModelReference(model)` to define relationships. The field accepts a populated document, a string ID, or a mongoose ObjectId:
 
 ```typescript
 const JobModel = typebooxe(Type.Object({
@@ -93,17 +93,17 @@ const PersonModel = typebooxe(Type.Object({
   job : ModelReference(JobModel)
 }, { $id: "Person" }))
 
-// Todos son válidos:
+// All of these are valid:
 PersonModel.find({ job: "670e8b0c500875615df28cac" })
 PersonModel.find({ job: new Types.ObjectId("670e8b0c500875615df28cac") })
 ```
 
-### Cast de referencias populadas
+### Casting populated / unpopulated references
 
-`.cast()` devuelve el documento con las referencias normalizadas:
+`.cast()` returns the document with normalized references:
 
-- **Poluado**: se castea al schema del modelo referenciado (`{ name, id }`)
-- **No poblada** (solo ObjectId): se castea a `{ id }`
+- **Populated**: cast to the referenced model's schema (`{ name, id }`)
+- **Unpopulated** (ObjectId only): cast to `{ id }`
 
 ```typescript
 const person = await PersonModel.findOne({ name: "aberigle" }).populate("job")
@@ -121,7 +121,7 @@ result = person.cast()
 // result.job ⇒ { id: "abc123..." }
 ```
 
-Para hacer la referencia opcional (no aparece en el casteado si no se setea):
+To make a reference optional (omitted from the casted object when not set):
 
 ```typescript
 const Person = Type.Object({
@@ -130,7 +130,7 @@ const Person = Type.Object({
 }, { $id: "Person" })
 ```
 
-### Arrays de referencias
+### Array of references
 
 ```typescript
 const PersonModel = typebooxe(Type.Object({
@@ -139,9 +139,9 @@ const PersonModel = typebooxe(Type.Object({
 }, { $id: "Person" }))
 ```
 
-## Auto-referencias (modelos recursivos)
+## Self-references (recursive models)
 
-Usa `Type.Recursive` para modelos que se referencian a sí mismos:
+Use `Type.Recursive` for models that reference themselves:
 
 ```typescript
 const Person = Type.Recursive(This =>
@@ -161,12 +161,12 @@ let child  = new PersonModel({ name: "child", parent })
 let result = child.cast()
 // result.parent ⇒ { name: "parent", id: "..." }
 
-child.parent = parent._id  // no populado
+child.parent = parent._id  // unpopulated
 result = child.cast()
 // result.parent ⇒ { id: "abc123..." }
 ```
 
-Múltiples auto-referencias en el mismo modelo:
+Multiple self-references in the same model:
 
 ```typescript
 const Person = Type.Recursive(This =>
@@ -180,7 +180,7 @@ const Person = Type.Recursive(This =>
 )
 ```
 
-Auto-referencias con arrays:
+Self-references with arrays:
 
 ```typescript
 const Person = Type.Recursive(This =>
@@ -193,9 +193,9 @@ const Person = Type.Recursive(This =>
 )
 ```
 
-El `$id` va en `Type.Recursive`, no en el `Type.Object` interno — es quien define el `$ref` del `This`.
+The `$id` goes on `Type.Recursive`, not on the inner `Type.Object` — it defines the `$ref` for `This`.
 
-## Getters y Setters
+## Getters and Setters
 
 ```typescript
 const PersonModel = typebooxe(Type.Object({
