@@ -1,13 +1,15 @@
 import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
-import { TypebooxeRef } from "./reference";
-import { typebooxe } from "../typebooxe";
+import { modelsCache, typebooxe } from "../typebooxe";
+import { ModelReference } from "./reference";
 
 describe('typebooxe', () => {
   describe('types', () => {
     beforeEach(() => {
       for (let key of Object.keys(mongoose.models)) delete mongoose.models[key]
+      const cache = modelsCache()
+      for (let key of Object.keys(cache)) delete cache[key]
     })
 
     it('handles ref objectids', async () => {
@@ -19,7 +21,7 @@ describe('typebooxe', () => {
       const PersonModel = typebooxe(Type.Object({
         id: Type.String(),
         name: Type.String(),
-        job: TypebooxeRef(JobModel)
+        job: ModelReference(JobModel)
       }, { $id: "Person" }))
 
       let job = new JobModel({ name: 'developer' })
@@ -33,7 +35,7 @@ describe('typebooxe', () => {
       person.job = job.id
       result = person.cast()
 
-      expect(result.job).toEqual({ id: job.id })
+      expect(result.job).toMatchObject({ id: job.id })
     })
 
     it('casts ref to string when not populated', async () => {
@@ -46,7 +48,7 @@ describe('typebooxe', () => {
       const PersonModel = typebooxe(Type.Object({
         id: Type.String(),
         name: Type.String(),
-        job: TypebooxeRef(JobModel)
+        job: ModelReference(JobModel)
       }, { $id: "Person" }))
 
       let job = new JobModel({ name: 'developer' })
@@ -61,7 +63,7 @@ describe('typebooxe', () => {
       person.job = job._id
 
       result = person.cast()
-      expect(result.job.id).toBe(job._id.toHexString())
+      expect(result.job?.id).toBe(job._id.toHexString())
     })
 
     it('casts only defined fields', async () => {
@@ -73,7 +75,7 @@ describe('typebooxe', () => {
       const PersonModel = typebooxe(Type.Object({
         id: Type.String(),
         name: Type.String(),
-        job: TypebooxeRef(JobModel)
+        job: ModelReference(JobModel)
       }, { $id: "Person" }))
 
       let job = new JobModel({ name: 'developer' })
@@ -88,11 +90,46 @@ describe('typebooxe', () => {
 
       let result = person.cast(PublicType)
 
-      // @ts-ignore
       expect(result.job.id).toBeUndefined()
     })
 
-    it('casts reference arrays', async () => {
+    it('handles optional ref not set', async () => {
+      const JobModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String()
+      }, { $id: 'Job' }))
+
+      const PersonModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        job: Type.Optional(ModelReference(JobModel))
+      }, { $id: "Person" }))
+
+      let person = new PersonModel({ name: 'aberigle' })
+
+      let result = person.cast()
+      expect(result.job).toBeUndefined()
+    })
+
+    it('handles optional ref set to null', async () => {
+      const JobModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String()
+      }, { $id: 'Job' }))
+
+      const PersonModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        job: Type.Optional(ModelReference(JobModel))
+      }, { $id: "Person" }))
+
+      let person = new PersonModel({ name: 'aberigle', job: null })
+
+      let result = person.cast()
+      expect(result.job).toBeUndefined()
+    })
+
+    it('handles ref array', async () => {
       const JobModel = typebooxe(Type.Object({
         id: Type.String(),
         name: Type.String(),
@@ -102,7 +139,31 @@ describe('typebooxe', () => {
       const PersonModel = typebooxe(Type.Object({
         id: Type.String(),
         name: Type.String(),
-        jobs: Type.Array(TypebooxeRef(JobModel))
+        jobs: Type.Array(ModelReference(JobModel))
+      }, { $id: "Person" }))
+
+      let job = new JobModel({ name: 'developer', salary: 30 })
+      let job2 = new JobModel({ name: 'QA', salary: 50 })
+      let person = new PersonModel({ name: 'aberigle', jobs: [job, job2] })
+
+      const result = person.cast()
+
+      expect(Array.isArray(result.jobs)).toBeTrue()
+      expect(result.jobs.at(0)).toMatchObject({ name: "developer" })
+      expect(result.jobs.at(1)).toMatchObject({ name: "QA" })
+    })
+
+    it('casts reference arrays with partial fields', async () => {
+      const JobModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        salary: Type.Number()
+      }, { $id: 'Job' }))
+
+      const PersonModel = typebooxe(Type.Object({
+        id: Type.String(),
+        name: Type.String(),
+        jobs: Type.Array(ModelReference(JobModel))
       }, { $id: "Person" }))
 
       let job = new JobModel({ name: 'developer', salary: 30 })
@@ -115,9 +176,9 @@ describe('typebooxe', () => {
       ])
 
       const result = person.cast(PublicType)
-      expect(result.jobs[0]).toEqual({ name: "developer" })
-    })
 
+      expect(Array.isArray(result.jobs)).toBeTrue()
+      expect(result.jobs.at(0)).toEqual({ name: "developer" })
+    })
   })
 })
-

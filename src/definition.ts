@@ -1,4 +1,4 @@
-import { type TObject, type TSchema } from "@sinclair/typebox"
+import { TOptional, type TObject, type TSchema } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
 import { DefinitionOptions } from "./types"
 
@@ -22,11 +22,11 @@ function parseProperty(
     case 'array'   : return { ...def, type : [parseProperty(field.items)] }
   }
 
-  const key = Symbol.for("TypeBox.Kind")
+  const key    = Symbol.for("TypeBox.Kind")
   const symbol = key in field ? field[key] : ''
 
   switch (symbol) {
-    case 'Ref': return {
+    case 'This': return {
       ...def,
       type: Schema.Types.ObjectId,
       ref: field.$ref
@@ -67,21 +67,23 @@ function parseObject<T extends TObject>(
     setters
   }: DefinitionOptions<T> = {}
 ) {
+  const properties = object.properties ?? []
+  const required   = object.required ?? []
   const schema: SchemaDefinition = {}
 
-  for (const key in object.properties) {
+  for (const key in properties) {
     if (key == "id") continue
-    const property = object.properties[key]
+    const property = properties[key]
     const field = parseProperty(property)
 
     if (field == undefined) continue
 
-    if (field.type) field.required = !!object.required?.includes(key)
+    if (field.type) field.required = required.includes(key)
 
     if ("default" in property) field.default = property.default
 
-    if (getters && getters[key]) field.get = getters[key]
-    if (setters && setters[key]) field.set = setters[key]
+    if (getters && key in getters) field.get = getters[key as keyof typeof getters]
+    if (setters && key in setters) field.set = setters[key as keyof typeof setters]
 
     schema[key] = field
   }

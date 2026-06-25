@@ -2,7 +2,7 @@ import { Type } from "@sinclair/typebox";
 import { beforeEach, describe, expect, it } from "bun:test";
 import mongoose from "mongoose";
 import { typebooxe } from "./typebooxe";
-import { TypebooxeRef } from "./types/reference";
+import { ModelReference } from "./types/reference";
 
 describe('typebooxe', () => {
   describe('model', () => {
@@ -81,8 +81,8 @@ describe('typebooxe', () => {
       const JobModel = typebooxe(JobType)
 
       const PersonType = Type.Object({
-        name: Type.String(),
-        job: TypebooxeRef(JobModel)
+        name : Type.String(),
+        job  : ModelReference(JobModel)
       }, { $id: "Person" })
       const PersonModel = typebooxe(PersonType)
 
@@ -106,7 +106,7 @@ describe('typebooxe', () => {
 
       const PersonType = Type.Object({
         name: Type.String(),
-        job: TypebooxeRef(JobModel)
+        job: ModelReference(JobModel)
       }, { $id: "Person" })
       const PersonModel = typebooxe(PersonType)
 

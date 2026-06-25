@@ -1,4 +1,5 @@
 import {
+  type TRecursive,
   type TObject,
   type TSchema
 } from "@sinclair/typebox";
@@ -12,14 +13,31 @@ import type { TypebooxeModel, TypebooxeOptions, TypebooxePlugin } from "./types"
 
 const goose: Mongoose = mongoose
 
-const definitions: Record<string, TSchema> = {}
-const schemas: Record<string, mongoose.Schema> = {}
+const models      : Record<string, TypebooxeModel<any>> = {}
+const definitions : Record<string, TSchema> = {}
+const schemas     : Record<string, mongoose.Schema> = {}
 
 export function typebooxe<
   T       extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 >(
-  object  : T,
+  object: T,
+  options?: TypebooxeOptions<T, [...Plugins]>
+): TypebooxeModel<T, Plugins>
+
+export function typebooxe<
+  T       extends TObject,
+  Plugins extends readonly TypebooxePlugin<TObject>[] = []
+>(
+  object: TRecursive<T>,
+  options?: TypebooxeOptions<T, [...Plugins]>
+): TypebooxeModel<T, Plugins>
+
+export function typebooxe<
+  T extends TObject = TObject,
+  Plugins extends readonly TypebooxePlugin<TObject>[] = []
+>(
+  object: T | TRecursive<T>,
   options: TypebooxeOptions<T, [...Plugins]> = {}
 ) {
 
@@ -27,7 +45,7 @@ export function typebooxe<
 
   const name : string = object.$id as string
   definitions[name] = object
-  const schema  = createSchema<T, Plugins>(object, options)
+  const schema  = createSchema<T, Plugins>(object as T, options)
   schemas[name] = schema
 
   const model = goose.model(
@@ -35,7 +53,7 @@ export function typebooxe<
     schemas[name]
   ) as TypebooxeModel<T, Plugins>
 
-  model.$typebooxe = object
+  model.$typebooxe = object as T
 
   return model
 }
@@ -54,6 +72,10 @@ export function typebooxePlugin<
       schema.add(plugin.obj)
     }
   }
+}
+
+export function modelsCache() {
+  return models
 }
 
 export function useModels() {

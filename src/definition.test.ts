@@ -1,6 +1,6 @@
 
 import { Type } from "@sinclair/typebox";
-import { describe, expect, it } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { Schema } from "mongoose";
 import { createDefinition } from "./definition";
 
@@ -10,7 +10,7 @@ function definition(def: any, options = {}) {
 
 describe('typebooxe', () => {
   describe('definition', () => {
-    it("strings", () => {
+    test("strings", () => {
       const def = definition({
         test: Type.String()
       })
@@ -18,7 +18,7 @@ describe('typebooxe', () => {
       expect(def.test).toMatchObject({ type: String })
     })
 
-    it("number", () => {
+    test("number", () => {
       const def = definition({
         number: Type.Number(),
         integer: Type.Integer()
@@ -28,17 +28,17 @@ describe('typebooxe', () => {
       expect(def.integer).toMatchObject({ type: Number })
     })
 
-    it("boolean", () => {
+    test("boolean", () => {
       const def = definition({ test: Type.Boolean() })
       expect(def.test).toMatchObject({ type: Boolean })
     })
 
-    it("dates", () => {
+    test("dates", () => {
       const def = definition({ test: Type.Date() })
       expect(def.test).toMatchObject({ type: Date })
     })
 
-    it("optionals", () => {
+    test("optionals", () => {
       const def = definition({
         mandatory: Type.String(),
         optional: Type.Optional(Type.String())
@@ -47,7 +47,7 @@ describe('typebooxe', () => {
       expect(def.optional).toMatchObject({ type: String, required: false })
     })
 
-    it("defaults", () => {
+    test("defaults", () => {
       const def = definition({
         flag: Type.Boolean({ default: false }),
         text: Type.String({ default: "hello" }),
@@ -59,7 +59,7 @@ describe('typebooxe', () => {
       expect(def.number).toMatchObject({ type: Number, default: 27 })
     })
 
-    it("any (Mixed)", () => {
+    test("any (Mixed)", () => {
       const def = definition({
         test: Type.Any()
       })
@@ -67,18 +67,8 @@ describe('typebooxe', () => {
       expect(def.test).toMatchObject({ type: Schema.Types.Mixed })
     })
 
-    it("refs", () => {
-      const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
-      const def = definition({
-        reference: Type.Optional(Type.Ref(tReferenced)),
-      }, {
-        references: [tReferenced]
-      })
 
-      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref: 'Referenced' })
-    })
-
-    it("enums", () => {
+    test("enums", () => {
       enum TestEnum {
         ONE = "ONE",
         TWO = "TWO"
@@ -94,7 +84,7 @@ describe('typebooxe', () => {
 
     })
 
-    it("objects", () => {
+    test("objects", () => {
       const def = definition({
         test: Type.Object({
           field: Type.String()
@@ -110,7 +100,7 @@ describe('typebooxe', () => {
       })
     })
 
-    it("optional objects", () => {
+    test("optional objects", () => {
       const def = definition({
         test: Type.Optional(
           Type.Object({
@@ -121,7 +111,7 @@ describe('typebooxe', () => {
       expect(def.test.required).toBeFalse()
     })
 
-    it("arrays", () => {
+    test("arrays", () => {
       const def = definition({
         text: Type.Array(Type.String()),
         objects: Type.Array(
@@ -136,16 +126,32 @@ describe('typebooxe', () => {
       expect(def.objects.type[0].type.obj).toMatchObject({ test: { type: String } })
     })
 
-    it("not populated refs", () => {
-      const tReferenced = Type.Object({ test: Type.String() }, { $id: "Referenced" })
-      const def = definition({
-        reference: Type.Union([Type.Ref(tReferenced), Type.String()]),
-      }, {
-        references: [tReferenced]
-      })
+    test("recursive this ref", () => {
+      const Person = Type.Recursive(This =>
+        Type.Object({
+          name: Type.String(),
+          parent: Type.Optional(This)
+        }), { $id: "Person" }
+      )
+      const def = createDefinition(Person)
 
-      expect(def.reference).toMatchObject({ type: Schema.Types.ObjectId, ref: 'Referenced' })
+      expect(def.parent).toMatchObject({ type: Schema.Types.ObjectId, ref: Person.$id })
+      expect(Person.$id).toBe("Person")
     })
+
+    test("recursive this ref array", () => {
+      const Person = Type.Recursive(This =>
+        Type.Object({
+          name: Type.String(),
+          children: Type.Array(This)
+        }), { $id: "Person" }
+      )
+      const def = createDefinition(Person)
+
+      expect(def.children.type).toMatchObject([{ type: Schema.Types.ObjectId, ref: Person.$id }])
+    })
+
+
   })
 
 })

@@ -1,4 +1,4 @@
-import { Static, TObject, TSchema, Type } from "@sinclair/typebox"
+import { Static, TSchema, Type, TObject } from "@sinclair/typebox"
 import mongoose, { Types } from "mongoose"
 
 export type MongooseIndexOption = {
@@ -63,7 +63,7 @@ export type TypebooxeModel<
   T extends TObject,
   Plugins extends readonly TypebooxePlugin<TObject>[] = []
 > = mongoose.Model<
-  TypebooxeRaw<T, Plugins>,// & { _id: Types.ObjectId },
+  TypebooxeRaw<T, Plugins>,
   {},
   Methods<T, Plugins>,
   {},
