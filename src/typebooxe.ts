@@ -81,3 +81,7 @@ export function modelsCache() {
 export function useModels() {
   return definitions
 }
+
+export function getModelDefinition(name: string) {
+  return definitions[name]
+}

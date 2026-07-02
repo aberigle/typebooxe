@@ -1,5 +1,24 @@
 import { Kind, TObject, TSchema, Type } from "@sinclair/typebox"
 import { ReferenceType } from "../fields/reference"
+import { getModelDefinition } from "../typebooxe"
+
+function isPlaceholderRef(
+  schema: TSchema
+): boolean {
+  const keys = Object.keys(schema.properties ?? {})
+  return keys.length === 1 && keys[0] === 'id'
+}
+
+function resolvePlaceholder(
+  schema: TSchema
+): TSchema {
+  const model = schema.$id!.replace("ref@", "")
+  const def = getModelDefinition(model)
+  if (!def) throw new Error(
+    `Model "${model}" not found. Ensure the model is registered before calling cast().`
+  )
+  return ReferenceType(def, model)
+}
 
 export function generateCastType(
   schema: TSchema,
@@ -16,10 +35,11 @@ export function generateCastType(
     schema.$id?.startsWith("ref@")
   ) return ReferenceType(top, top.$id as string)
 
-  if (
-    schema.type !== 'object' ||
-    schema.$id?.includes("ref@")
-  ) return schema
+  if (schema.type !== 'object')
+    return schema
+
+  if (schema.$id?.startsWith("ref@"))
+    return isPlaceholderRef(schema) ? resolvePlaceholder(schema) : schema
 
   const object = schema as TObject
 
