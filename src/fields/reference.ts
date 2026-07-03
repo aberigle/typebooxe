@@ -33,9 +33,13 @@ export function ModelReference<T extends TObject = TObject>(
 }
 
 export function ReferenceType<T extends TSchema>(
-  object: T,
-  ref: string
+  object     : T,
+  reference? : string
 ) {
+  const ref = reference ?? object.$id
+
+  if (!ref) throw new Error("ReferenceType: reference is mandatory")
+
   return Type.Intersect([
     Type.Optional(Type.Partial(object)),
     Type.Pick(object, ["id"])],

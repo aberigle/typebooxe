@@ -6,7 +6,7 @@ export {
 } from "./types"
 
 export { PrefixedId } from "./fields/prefixed-id"
-export { ModelReference } from "./fields/reference"
+export { ModelReference, ReferenceType } from "./fields/reference"
 export { SelfReference } from './fields/self-reference'
 
 export {
