@@ -1,5 +1,6 @@
 import { type TObject, type TSchema } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
+import { referenceParts } from "./fields/reference/parts"
 import { DefinitionOptions } from "./types"
 
 function parseProperty(
@@ -52,11 +53,17 @@ function parseProperty(
 function parseReference(
   field: TSchema
 ): SchemaTypeOptions<any> {
-  const model = field.$id?.split("ref@").pop()
+  const parts = referenceParts(field.$id)
+
+  if (parts?.refPath)
+    return {
+      type: Schema.Types.ObjectId,
+      refPath: parts.refPath
+    }
 
   return {
     type: Schema.Types.ObjectId,
-    ref: model
+    ref: parts?.names[0] ?? field.$id?.split("ref@").pop()
   }
 }
 

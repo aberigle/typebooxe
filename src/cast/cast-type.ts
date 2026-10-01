@@ -1,5 +1,6 @@
 import { Kind, TObject, TSchema, Type } from "@sinclair/typebox"
-import { ReferenceType } from "../fields/reference"
+import { referenceParts } from "../fields/reference/parts"
+import { ReferenceType } from "../fields/reference/schema"
 import { getModelDefinition } from "../typebooxe"
 
 function isPlaceholderRef(
@@ -17,13 +18,24 @@ function resolvePlaceholder(
   if (!def) throw new Error(
     `Model "${model}" not found. Ensure the model is registered before calling cast().`
   )
-  return ReferenceType(def, model)
+  return ReferenceType(def as TObject, model)
 }
 
 export function generateCastType(
   schema: TSchema,
   top: TObject = schema as TObject
 ): TSchema {
+  const parts = referenceParts(schema.$id)
+
+  if (parts?.refPath)
+    return Type.Union(parts.names.map(name => {
+      const def = getModelDefinition(name)
+      if (!def) throw new Error(
+        `Model "${name}" not found. Ensure the model is registered before calling cast().`
+      )
+      return ReferenceType(def as TObject, name)
+    }), { $id: schema.$id }) as TSchema
+
   if (schema[Kind] === 'This')
     return ReferenceType(top, top.$id as string)
 

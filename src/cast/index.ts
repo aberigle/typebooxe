@@ -1,5 +1,6 @@
 import { TSchema } from "@sinclair/typebox"
 import { Value, ValueError, ValueErrorType, ValuePointer } from '@sinclair/typebox/value'
+import { resolveDynamicRefs } from "../fields/reference/resolve"
 
 //@ts-ignore
 import mongoose from "mongoose/lib/index.js"
@@ -9,6 +10,7 @@ export function castItem(
   item       : any,
   references : TSchema[] = []
 ) {
+  def = resolveDynamicRefs(def, item)
   item = reduceErrors(item, Value.Errors(def, references, item))
   const cleaned = Value.Clean(def, references, item)
   return Value.Encode(def, references, cleaned)
@@ -38,10 +40,8 @@ function handleError(item: any, error: ValueError) {
         return Value.Patch(item, [{ type: "update", path: error.path, value: id }])
       }
     case ValueErrorType.Union:
-      if (error.schema.$id?.includes("ref@")) {
-        for (let iterator of error.errors) item = reduceErrors(item, iterator)
-        return item
-      }
+      for (let iterator of error.errors) item = reduceErrors(item, iterator)
+      return item
     default:
       return item
   }
