@@ -24,7 +24,7 @@ function reduceErrors(item: any, errors: Value.ValueErrorIterator) {
 function handleError(item: any, error: ValueError) {
   switch (error.type) {
     case ValueErrorType.Object:
-      if (error.path !== "/_id" && mongoose.isValidObjectId(error.value))
+      if (!error.path.includes("/_id") && mongoose.isValidObjectId(error.value))
         return Value.Patch(item, [{ type: "update", path: error.path, value: { id: error.value } }])
 
       if (mongoose.isValidObjectId(error.value) || error.value === null)
@@ -34,9 +34,10 @@ function handleError(item: any, error: ValueError) {
         ])
 
       return item
+
     case ValueErrorType.String:
       if (error.path.endsWith("/id")) {
-        const id = ValuePointer.Get(item, error.path.replace("id", "_id"))
+        const id = ValuePointer.Get(item, error.path.replace("/id", "/_id"))
         return Value.Patch(item, [{ type: "update", path: error.path, value: id }])
       }
     case ValueErrorType.Union:
