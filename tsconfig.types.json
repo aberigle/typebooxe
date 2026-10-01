@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/fields/reference/reference.types.test.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build.ts"
+  ]
+}
