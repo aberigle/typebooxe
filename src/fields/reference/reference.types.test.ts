@@ -1,5 +1,3 @@
-import { test, expect } from "bun:test"
-import { $ } from "bun"
 import { Static, Type } from "@sinclair/typebox"
 import { ModelReference } from "./index"
 import { typebooxe } from "../../typebooxe"
@@ -37,9 +35,3 @@ function _types() {
 
   return [_post, _product, _string, _bad]
 }
-
-test("refPath type-level assertions hold", async () => {
-  const result = await $`./node_modules/.bin/tsc -p tsconfig.types.json`.nothrow().quiet()
-
-  expect(result.exitCode).toBe(0)
-})

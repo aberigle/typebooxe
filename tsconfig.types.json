@@ -4,7 +4,7 @@
     "noEmit": true
   },
   "include": [
-    "src/fields/reference/reference.types.test.ts"
+    "src/**/*.types.test.ts"
   ],
   "exclude": [
     "node_modules",
