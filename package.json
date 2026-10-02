@@ -19,7 +19,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@sinclair/typebox": "^0.34.49",
+    "@sinclair/typebox": ">=0.34.0 <0.35.0",
     "mongoose": "^9.6.1"
   }
 }
