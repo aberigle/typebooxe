@@ -139,6 +139,51 @@ const PersonModel = typebooxe(Type.Object({
 }, { $id: "Person" }))
 ```
 
+### Dynamic references (`refPath`)
+
+When the referenced collection depends on another field of the document (mongoose's
+`refPath`), pass the list of candidate models and the name of the discriminator field.
+The discriminator is yours to declare; `typebooxe` won't fill it for you. Model names as
+strings are also accepted, for circular references.
+
+```typescript
+const PostModel    = typebooxe(Type.Object({ title: Type.String() }, { $id: "Post" }))
+const ProductModel = typebooxe(Type.Object({ price: Type.Number() }, { $id: "Product" }))
+
+const CommentModel = typebooxe(Type.Object({
+  body   : Type.String(),
+  onModel: Type.Union([Type.Literal("Post"), Type.Literal("Product")]),
+  on     : ModelReference([PostModel, ProductModel], { refPath: "onModel" })
+}, { $id: "Comment" }))
+
+const comment = new CommentModel({ body: "hi", onModel: "Post", on: post })
+
+comment.cast().on  // ⇒ { title: "hello", id: "..." } — resolved from onModel
+```
+
+With strings, for circular references (the model doesn't exist yet when the schema is declared):
+
+```typescript
+on: ModelReference(["Post", "Comment"], { refPath: "onModel" })
+```
+
+The discriminator is required in the result: if it's missing or matches no candidate, the
+cast fails.
+
+## Prefixed IDs
+
+`PrefixedId(prefix)` declares an `id` serialized with a Base36 prefix instead of mongo's
+24-character hex. It's unmasked on read and masked on write.
+
+```typescript
+const ProjectModel = typebooxe(Type.Object({
+  id  : PrefixedId("prj"),
+  name: Type.String()
+}, { $id: "Project" }))
+
+new ProjectModel({ name: "x" }).cast().id  // ⇒ "prj_35qdq9mgpsa7alngckj"
+```
+
 ## Self-references (recursive models)
 
 Use `Type.Recursive` for models that reference themselves:
