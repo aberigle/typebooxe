@@ -62,6 +62,18 @@ describe('cast', () => {
     })
   })
 
+  describe('records', () => {
+    it('keeps the keys of a record', () => {
+      const Model = typebooxe(Type.Object({
+        data: Type.Record(Type.String(), Type.Number())
+      }, { $id: 'CastRecord' }))
+
+      const doc = new Model({ data: { a: 1, b: 2 } })
+
+      expect(doc.cast().data).toEqual({ a: 1, b: 2 })
+    })
+  })
+
   describe('references', () => {
     const setup = () => {
       const Job = typebooxe(Type.Object({

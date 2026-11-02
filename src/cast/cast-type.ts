@@ -55,6 +55,10 @@ export function generateCastType(
 
   const object = schema as TObject
 
+  // Records (Type.Record) have no `properties`: rebuilding them would drop
+  // their patternProperties and Value.Clean would empty the value
+  if (!object.properties) return schema
+
   const result: any = {}
   for (let key in object.properties ?? []) {
     let fixed = generateCastType(object.properties[key], top)
