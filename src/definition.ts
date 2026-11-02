@@ -19,7 +19,15 @@ function parseProperty(
     case 'integer' : return { ...def, type: Number }
     case 'boolean' : return { ...def, type: Boolean }
     case 'Date'    : return { ...def, type: Date }
-    case 'object'  : return { ...def, type: new Schema(parseObject(field as TObject)) }
+    case 'object'  : {
+      const object = field as TObject
+
+      // Records (Type.Record) have no `properties`: they use patternProperties.
+      // An empty subdocument would silently strip every key, so keep it Mixed.
+      if (!object.properties) return { ...def, type: Schema.Types.Mixed }
+
+      return { ...def, type: new Schema(parseObject(object)) }
+    }
     case 'array'   : return { ...def, type : [parseProperty(field.items)] }
   }
 

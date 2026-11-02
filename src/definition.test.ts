@@ -111,6 +111,16 @@ describe('typebooxe', () => {
       expect(def.test.required).toBeFalse()
     })
 
+    test("records (Mixed)", () => {
+      const def = definition({
+        test: Type.Record(Type.String(), Type.Object({
+          count: Type.Number()
+        }))
+      })
+
+      expect(def.test).toMatchObject({ type: Schema.Types.Mixed })
+    })
+
     test("arrays", () => {
       const def = definition({
         text: Type.Array(Type.String()),
