@@ -1,4 +1,4 @@
-import { type TObject, type TSchema } from "@sinclair/typebox"
+import { Kind, type TObject, type TSchema, type TUnion } from "@sinclair/typebox"
 import { Schema, SchemaTypeOptions, type SchemaDefinition } from "mongoose"
 import { referenceParts } from "./fields/reference/parts"
 import { DefinitionOptions } from "./types"
@@ -23,8 +23,7 @@ function parseProperty(
     case 'array'   : return { ...def, type : [parseProperty(field.items)] }
   }
 
-  const key    = Symbol.for("TypeBox.Kind")
-  const symbol = key in field ? field[key] : ''
+  const symbol = field[Kind] ?? ''
 
   switch (symbol) {
     case 'This': return {
@@ -36,18 +35,36 @@ function parseProperty(
       ...def,
       type: Schema.Types.Mixed
     }
-    case 'Union':
-      if (field.$id?.includes("ref@")) return parseReference(field)
-      let ref = field.anyOf.find((item: TSchema) => key in item && item[key] === 'Ref')
-      if (ref) return parseProperty(ref)
-      return {
-        ...def,
-        type: String,
-        enum: field.anyOf.map(value => value.const)
-      }
+    case 'Union': return parseUnionProperty(field as TUnion)
   }
 
   throw new Error("Type not supported: " + (field.type || symbol))
+}
+
+function parseUnionProperty(
+  field: TUnion
+): SchemaTypeOptions<any> {
+
+  // A ref wins over the rest: nullable refs and ref + plain variants
+  const isRef = (item: TSchema) =>
+    item[Kind] === 'Ref' || !!item.$id?.includes("ref@")
+
+  const ref = field.anyOf.find(isRef)
+  if (ref) return parseProperty(ref)
+
+  // Every member is an object: mongoose can't express anyOf, so Mixed
+  if (field.anyOf.every((item: TSchema) => item.type === 'object'))
+    return { type: Schema.Types.Mixed }
+
+  // Every member is a literal (Type.Literal / Type.Enum): one String + enum
+  if (field.anyOf.every((item: TSchema) => "const" in item))
+    return {
+      type: String,
+      enum: field.anyOf.map(item => item.const)
+    }
+
+  // Mixed kinds (String | Number, ref | null): Mixed, never a silent String
+  return { type: Schema.Types.Mixed }
 }
 
 function parseReference(
